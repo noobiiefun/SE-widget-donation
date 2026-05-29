@@ -1,4 +1,4 @@
-# 🎯 Stream Alert Hub v1.0
+# 🎯 SE Widget Donation Hub v1.0
 
 > **1 Browser Source di OBS** untuk semua notifikasi donasi — Saweria, Trakteer, SociaBuzz, Streamlabs, dan provider lain.
 
