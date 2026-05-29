@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<!-- Stream Alert Hub — overlay.html -->
+<!-- OBS: Browser Source → http://localhost:3000/overlay -->
+<!-- Width: 1920 | Height: 1080 | Transparent background -->
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>SAH Overlay</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body {
+  width: 1920px; height: 1080px;
+  background: transparent;
+  overflow: hidden;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* ── Alert Container (posisi bisa diubah dari config) ── */
+#alert-wrap {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+/* Posisi presets */
+#alert-wrap.bottom-right  { bottom: 40px; right: 40px; align-items: flex-end; }
+#alert-wrap.bottom-left   { bottom: 40px; left: 40px;  align-items: flex-start; }
+#alert-wrap.top-right     { top: 40px;    right: 40px; align-items: flex-end; }
+#alert-wrap.top-left      { top: 40px;    left: 40px;  align-items: flex-start; }
+#alert-wrap.bottom-center { bottom: 40px; left: 50%;   transform: translateX(-50%); align-items: center; }
+#alert-wrap.top-center    { top: 40px;    left: 50%;   transform: translateX(-50%); align-items: center; }
+
+/* ── Alert Card ── */
+.alert-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 22px;
+  border-radius: 16px;
+  min-width: 380px;
+  max-width: 520px;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08);
+  animation: slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+.alert-card.leaving {
+  animation: slideOut 0.35s ease-in forwards;
+}
+
+/* ── Provider color themes ── */
+.alert-card.saweria    { background: rgba(20,14,6,0.92); border-left: 4px solid #f5c842; }
+.alert-card.trakteer   { background: rgba(18,6,14,0.92); border-left: 4px solid #e84393; }
+.alert-card.sociabuzz  { background: rgba(6,14,20,0.92); border-left: 4px solid #4394e8; }
+.alert-card.streamlabs { background: rgba(7,16,8,0.92);  border-left: 4px solid #30e878; }
+
+/* Glow effect di sisi kiri */
+.alert-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 120px;
+  opacity: 0.07;
+  pointer-events: none;
+}
+.alert-card.saweria::before    { background: radial-gradient(ellipse at left, #f5c842, transparent); }
+.alert-card.trakteer::before   { background: radial-gradient(ellipse at left, #e84393, transparent); }
+.alert-card.sociabuzz::before  { background: radial-gradient(ellipse at left, #4394e8, transparent); }
+.alert-card.streamlabs::before { background: radial-gradient(ellipse at left, #30e878, transparent); }
+
+/* ── Provider Badge ── */
+.provider-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.saweria    .provider-badge { background: rgba(245,200,66,0.15); }
+.trakteer   .provider-badge { background: rgba(232,67,147,0.15); }
+.sociabuzz  .provider-badge { background: rgba(67,148,232,0.15); }
+.streamlabs .provider-badge { background: rgba(48,232,120,0.15); }
+
+/* ── Avatar ── */
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,0.15);
+}
+
+/* ── Content ── */
+.alert-content { flex: 1; min-width: 0; }
+
+.alert-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.alert-from {
+  font-size: 17px;
+  font-weight: 800;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.alert-amount {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.saweria    .alert-amount { color: #f5c842; }
+.trakteer   .alert-amount { color: #e84393; }
+.sociabuzz  .alert-amount { color: #4394e8; }
+.streamlabs .alert-amount { color: #30e878; }
+
+.alert-type-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.05);
+  flex-shrink: 0;
+}
+
+.alert-message {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.5;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Progress bar (timer) */
+.alert-progress {
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 3px;
+  border-radius: 0 0 0 16px;
+  transition: width linear;
+}
+.saweria    .alert-progress { background: #f5c842; }
+.trakteer   .alert-progress { background: #e84393; }
+.sociabuzz  .alert-progress { background: #4394e8; }
+.streamlabs .alert-progress { background: #30e878; }
+
+/* ── Event-specific styles ── */
+.event-follow .provider-badge { font-size: 28px; }
+.event-subscription .provider-badge { font-size: 28px; }
+.event-bits .provider-badge { font-size: 24px; }
+
+/* ── Animations ── */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(40px) scale(0.92); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes slideOut {
+  from { opacity: 1; transform: translateX(0) scale(1); }
+  to   { opacity: 0; transform: translateX(60px) scale(0.88); }
+}
+
+/* Particle burst for big donations */
+.burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 16px;
+}
+.particle {
+  position: absolute;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  animation: burst-anim 0.8s ease-out forwards;
+  opacity: 0;
+}
+@keyframes burst-anim {
+  0%   { opacity: 1; transform: translate(0,0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
+}
+</style>
+</head>
+<body>
+<div id="alert-wrap" class="bottom-right"></div>
+
+<script>
+const SERVER = 'http://localhost:3000';
+const wrap   = document.getElementById('alert-wrap');
+
+// Config dari server
+let CFG = { duration: 6000, position: 'bottom-right', sound: true, queue_delay: 1000 };
+
+// Queue agar notifikasi tampil bergantian
+let queue   = [];
+let showing = false;
+
+// Provider info
+const PROVIDERS = {
+  saweria:    { label: 'SAWERIA',    color: '#f5c842', icon: '💛' },
+  trakteer:   { label: 'TRAKTEER',  color: '#e84393', icon: '🩷' },
+  sociabuzz:  { label: 'SOCIABUZZ', color: '#4394e8', icon: '💙' },
+  streamlabs: { label: 'STREAMLABS',color: '#30e878', icon: '🎮' },
+};
+
+const TYPE_ICONS = {
+  donation:     null, // pakai provider icon
+  follow:       '👤',
+  subscription: '⭐',
+  resub:        '⭐',
+  bits:         '💎',
+  raid:         '⚔️',
+};
+
+const TYPE_LABELS = {
+  donation:     'DONASI',
+  follow:       'FOLLOW BARU',
+  subscription: 'SUBSCRIBER',
+  resub:        'RE-SUB',
+  bits:         'BITS',
+  raid:         'RAID',
+};
+
+// Format currency
+function fmt(amount, currency) {
+  if (!amount && amount !== 0) return null;
+  if (currency === 'IDR') {
+    if (amount >= 1000000) return 'Rp ' + (amount/1000000).toFixed(1) + 'jt';
+    if (amount >= 1000)    return 'Rp ' + Math.round(amount/1000) + 'k';
+    return 'Rp ' + amount.toLocaleString('id-ID');
+  }
+  if (currency === 'bits') return amount + ' bits';
+  if (currency === 'USD')  return '$' + parseFloat(amount).toFixed(2);
+  return amount;
+}
+
+// Buat card HTML
+function buildCard(alert) {
+  const prov = PROVIDERS[alert.provider] || { label: alert.provider?.toUpperCase(), color: '#aaa', icon: '🔔' };
+  const typeIcon  = TYPE_ICONS[alert.type] || prov.icon;
+  const typeLabel = TYPE_LABELS[alert.type] || alert.type?.toUpperCase() || 'NOTIF';
+  const amountStr = fmt(alert.amount, alert.currency);
+  const isBig     = alert.currency === 'IDR' ? alert.amount >= 100000 : alert.amount >= 10;
+
+  const card = document.createElement('div');
+  card.className = `alert-card ${alert.provider} event-${alert.type}`;
+
+  // Avatar / icon
+  let iconHtml = '';
+  if (alert.avatar) {
+    iconHtml = `<img class="avatar" src="${alert.avatar}" onerror="this.outerHTML='<div class=provider-badge>${typeIcon}</div>'" alt="">`;
+  } else {
+    iconHtml = `<div class="provider-badge">${typeIcon}</div>`;
+  }
+
+  // Unit info untuk Trakteer
+  let unitHtml = '';
+  if (alert.unit && alert.quantity) {
+    const unitIcon = alert.unit_icon ? `<img src="${alert.unit_icon}" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;">` : '';
+    unitHtml = `<span style="font-size:11px;color:rgba(255,255,255,0.45);margin-left:6px;">${unitIcon}${alert.quantity}x ${alert.unit}</span>`;
+  }
+
+  card.innerHTML = `
+    ${iconHtml}
+    <div class="alert-content">
+      <div class="alert-header">
+        <span class="alert-from">${esc(alert.from)}</span>
+        ${amountStr ? `<span class="alert-amount">${amountStr}</span>` : `<span class="alert-type-label">${typeLabel}</span>`}
+      </div>
+      ${amountStr ? `<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;"><span class="alert-type-label">${typeLabel}</span>${unitHtml}</div>` : ''}
+      ${alert.message ? `<div class="alert-message">${esc(alert.message)}</div>` : ''}
+    </div>
+    <div class="alert-progress" id="prog_${Date.now()}" style="width:100%"></div>
+    ${isBig ? '<div class="burst" id="burst_' + Date.now() + '"></div>' : ''}
+  `;
+
+  // Big donation particle burst
+  if (isBig) {
+    setTimeout(() => spawnParticles(card, prov.color), 100);
+  }
+
+  return card;
+}
+
+function spawnParticles(card, color) {
+  const burst = card.querySelector('.burst');
+  if (!burst) return;
+  for (let i = 0; i < 16; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.background = color;
+    p.style.left = (40 + Math.random() * 60) + 'px';
+    p.style.top  = (50 + Math.random() * 30) + 'px';
+    const angle = (Math.random() * 360) * Math.PI / 180;
+    const dist  = 40 + Math.random() * 60;
+    p.style.setProperty('--dx', Math.cos(angle)*dist + 'px');
+    p.style.setProperty('--dy', Math.sin(angle)*dist + 'px');
+    p.style.animationDelay = (Math.random() * 0.2) + 's';
+    burst.appendChild(p);
+  }
+}
+
+// Queue processor
+function processQueue() {
+  if (showing || queue.length === 0) return;
+  showing = true;
+  const alert = queue.shift();
+  showAlert(alert);
+}
+
+function showAlert(alert) {
+  const card = buildCard(alert);
+  wrap.insertBefore(card, wrap.firstChild);
+
+  // Progress bar animation
+  const prog = card.querySelector('.alert-progress');
+  if (prog) {
+    prog.style.transition = `width ${CFG.duration}ms linear`;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => { prog.style.width = '0%'; });
+    });
+  }
+
+  // Play sound (kalau ada)
+  if (CFG.sound) playSound(alert);
+
+  // Auto remove
+  setTimeout(() => {
+    card.classList.add('leaving');
+    setTimeout(() => {
+      card.remove();
+      showing = false;
+      setTimeout(processQueue, CFG.queue_delay);
+    }, 350);
+  }, CFG.duration);
+
+  // Max 3 cards visible
+  const cards = wrap.querySelectorAll('.alert-card');
+  if (cards.length > 3) cards[cards.length - 1].remove();
+}
+
+function playSound(alert) {
+  // Tone.js tidak tersedia, pakai Web Audio API sederhana
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    const freqs = { donation: [523, 659], follow: [440, 523], subscription: [523, 659, 784], bits: [659, 784] };
+    const notes = freqs[alert.type] || [523, 659];
+
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(notes[0], ctx.currentTime);
+    if (notes[1]) osc.frequency.setValueAtTime(notes[1], ctx.currentTime + 0.15);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.6);
+  } catch {}
+}
+
+// SSE connection
+let retries = 0;
+function connect() {
+  const es = new EventSource(SERVER + '/api/events');
+
+  es.onopen = () => { retries = 0; };
+
+  es.onmessage = (e) => {
+    try {
+      const d = JSON.parse(e.data);
+      if (d.type === 'ping') return;
+      if (d.type === 'CONFIG') {
+        applyConfig(d.config);
+        return;
+      }
+      // Push ke queue
+      queue.push(d);
+      processQueue();
+    } catch {}
+  };
+
+  es.onerror = () => {
+    es.close();
+    retries++;
+    setTimeout(connect, Math.min(2000 * retries, 15000));
+  };
+}
+
+function applyConfig(cfg) {
+  if (!cfg) return;
+  if (cfg.duration) CFG.duration = cfg.duration;
+  if (cfg.position) {
+    wrap.className = '';
+    wrap.classList.add(cfg.position);
+    CFG.position = cfg.position;
+  }
+  if (typeof cfg.sound !== 'undefined') CFG.sound = cfg.sound;
+  if (cfg.queue_delay) CFG.queue_delay = cfg.queue_delay;
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+connect();
+</script>
+</body>
+</html>

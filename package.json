@@ -1,0 +1,21 @@
+{
+  "name": "stream-alert-hub",
+  "version": "1.0.0",
+  "description": "1 Browser Source untuk semua notifikasi donasi - Saweria, Trakteer, SociaBuzz, Streamlabs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "socket.io-client": "^2.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
