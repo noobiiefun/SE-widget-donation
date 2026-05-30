@@ -1,13 +1,13 @@
 @echo off
-title Stream Alert Hub v1.0
+title SE Alert Bridge v1.0
 color 0A
 chcp 65001 >nul
 
 echo.
-echo  ╔══════════════════════════════════════════════════════╗
-echo  ║   Stream Alert Hub v1.0                             ║
-echo  ║   1 Browser Source untuk semua notifikasi donasi    ║
-echo  ╚══════════════════════════════════════════════════════╝
+echo  ╔════════════════════════════════════════════════════════╗
+echo  ║   SE Alert Bridge v1.0                               ║
+echo  ║   Notifikasi Saweria/Trakteer/dll → SE Overlay       ║
+echo  ╚════════════════════════════════════════════════════════╝
 echo.
 
 node --version >nul 2>&1
@@ -26,7 +26,7 @@ if not exist "node_modules\" (
 echo  [OK] Menjalankan server...
 echo.
 echo  Dashboard  : http://localhost:3000
-echo  Overlay OBS: http://localhost:3000/overlay
+echo  SSE Events : http://localhost:3000/events
 echo.
 echo  INGAT: Jalankan juga ngrok di terminal lain:
 echo         ngrok http 3000
