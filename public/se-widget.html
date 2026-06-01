@@ -10,77 +10,73 @@
   5. Tab JS  → kosongkan
   6. Tab Fields → kosongkan
   7. Klik Done → Save overlay
-  8. Atur ukuran widget: Width 1920 x Height 1080, posisi X:0 Y:0
+  8. Atur ukuran widget di canvas sesuai kebutuhan (tidak harus 1920x1080)
   =====================================
 -->
 <html>
 <head>
 <meta charset="UTF-8">
 <style>
-/* Reset */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* Pakai 100vw/100vh agar menyesuaikan ukuran widget di SE */
 html, body {
-  width: 1920px;
-  height: 1080px;
-  background: transparent;
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  background: transparent !important;
   overflow: hidden;
   font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
 }
 
-/* ── Container posisi ── */
+/* Container posisi — absolute dalam 100% area widget */
 #wrap {
-  position: absolute;
+  position: fixed;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   pointer-events: none;
   z-index: 999;
 }
 
-/* Posisi preset - diatur dari dashboard */
-#wrap.bottom-right  { bottom: 40px; right: 40px; align-items: flex-end; }
-#wrap.bottom-left   { bottom: 40px; left: 40px;  align-items: flex-start; }
-#wrap.top-right     { top: 40px;    right: 40px; align-items: flex-end; }
-#wrap.top-left      { top: 40px;    left: 40px;  align-items: flex-start; }
-#wrap.bottom-center { bottom: 40px; left: 50%;   transform: translateX(-50%); align-items: center; }
-#wrap.top-center    { top: 40px;    left: 50%;   transform: translateX(-50%); align-items: center; }
+#wrap.bottom-right  { bottom: 24px; right: 24px;  align-items: flex-end; }
+#wrap.bottom-left   { bottom: 24px; left: 24px;   align-items: flex-start; }
+#wrap.top-right     { top: 24px;    right: 24px;  align-items: flex-end; }
+#wrap.top-left      { top: 24px;    left: 24px;   align-items: flex-start; }
+#wrap.bottom-center { bottom: 24px; left: 50%;    transform: translateX(-50%); align-items: center; }
+#wrap.top-center    { top: 24px;    left: 50%;    transform: translateX(-50%); align-items: center; }
 
-/* ── Alert Card ── */
+/* Alert Card — pakai em/% bukan px fixed */
 .card {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 22px 20px;
-  border-radius: 16px;
-  min-width: 380px;
-  max-width: 540px;
+  gap: 14px;
+  padding: 14px 20px 18px;
+  border-radius: 14px;
+  min-width: min(380px, 90vw);
+  max-width: min(520px, 92vw);
+  width: max-content;
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow:
-    0 8px 40px rgba(0,0,0,0.55),
-    0 0 0 1px rgba(255,255,255,0.07);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.07);
   animation: slideIn 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards;
 }
 
-.card.out {
-  animation: slideOut 0.35s ease-in forwards;
-}
+.card.out { animation: slideOut 0.35s ease-in forwards; }
 
-/* Warna per provider */
 .card.saweria    { background: rgba(18,12,4,0.93);  border-left: 4px solid #f5c842; }
 .card.trakteer   { background: rgba(18,4,14,0.93);  border-left: 4px solid #e84393; }
 .card.sociabuzz  { background: rgba(4,12,22,0.93);  border-left: 4px solid #4394e8; }
 .card.streamlabs { background: rgba(4,18,8,0.93);   border-left: 4px solid #30e878; }
 .card.custom     { background: rgba(14,10,22,0.93); border-left: 4px solid #9b8dff; }
 
-/* Glow kiri */
 .card::before {
   content: '';
   position: absolute;
-  left: 0; top: 0; bottom: 0; width: 140px;
+  left: 0; top: 0; bottom: 0; width: 120px;
   opacity: 0.08; pointer-events: none;
 }
 .card.saweria::before    { background: radial-gradient(ellipse at left, #f5c842, transparent); }
@@ -89,12 +85,11 @@ html, body {
 .card.streamlabs::before { background: radial-gradient(ellipse at left, #30e878, transparent); }
 .card.custom::before     { background: radial-gradient(ellipse at left, #9b8dff, transparent); }
 
-/* ── Icon / Avatar ── */
 .icon-wrap {
-  width: 52px; height: 52px;
-  border-radius: 13px;
+  width: 46px; height: 46px;
+  border-radius: 11px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 24px;
+  font-size: 22px;
   flex-shrink: 0;
 }
 .saweria    .icon-wrap { background: rgba(245,200,66,0.14); }
@@ -104,14 +99,13 @@ html, body {
 .custom     .icon-wrap { background: rgba(155,141,255,0.14); }
 
 .avatar-img {
-  width: 52px; height: 52px;
+  width: 46px; height: 46px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
   border: 2px solid rgba(255,255,255,0.12);
 }
 
-/* ── Konten ── */
 .content { flex: 1; min-width: 0; }
 
 .row-top {
@@ -121,17 +115,19 @@ html, body {
 }
 
 .from-name {
-  font-size: 18px; font-weight: 800;
+  font-size: clamp(14px, 2vw, 18px);
+  font-weight: 800;
   color: #fff;
   white-space: nowrap; overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 230px;
+  max-width: 200px;
   letter-spacing: -0.2px;
 }
 
 .amount {
-  font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: 17px; font-weight: 600;
+  font-family: 'Courier New', monospace;
+  font-size: clamp(13px, 1.8vw, 17px);
+  font-weight: 600;
   white-space: nowrap; flex-shrink: 0;
 }
 .saweria    .amount { color: #f5c842; }
@@ -142,8 +138,8 @@ html, body {
 
 .type-badge {
   font-size: 10px; font-weight: 700;
-  letter-spacing: 1.1px; text-transform: uppercase;
-  padding: 2px 8px; border-radius: 4px;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 4px;
   color: rgba(255,255,255,0.45);
   background: rgba(255,255,255,0.05);
   flex-shrink: 0;
@@ -151,16 +147,13 @@ html, body {
 
 .row-mid {
   display: flex; align-items: center;
-  gap: 6px; margin-bottom: 5px;
+  gap: 6px; margin-bottom: 4px;
 }
 
-.unit-info {
-  font-size: 11px;
-  color: rgba(255,255,255,0.38);
-}
+.unit-info { font-size: 11px; color: rgba(255,255,255,0.38); }
 
 .message {
-  font-size: 13px;
+  font-size: clamp(11px, 1.5vw, 13px);
   color: rgba(255,255,255,0.68);
   line-height: 1.5;
   word-break: break-word;
@@ -170,12 +163,10 @@ html, body {
   overflow: hidden;
 }
 
-/* ── Progress bar ── */
 .bar {
   position: absolute;
   bottom: 0; left: 0;
-  height: 3px;
-  width: 100%;
+  height: 3px; width: 100%;
   transition: width linear;
 }
 .saweria    .bar { background: #f5c842; }
@@ -184,15 +175,14 @@ html, body {
 .streamlabs .bar { background: #30e878; }
 .custom     .bar { background: #9b8dff; }
 
-/* ── Particles ── */
 .particles {
   position: absolute; inset: 0;
   pointer-events: none; overflow: hidden;
-  border-radius: 16px;
+  border-radius: 14px;
 }
 .p {
   position: absolute;
-  width: 7px; height: 7px; border-radius: 50%;
+  width: 6px; height: 6px; border-radius: 50%;
   opacity: 0;
   animation: pop 0.9s ease-out forwards;
 }
@@ -201,27 +191,24 @@ html, body {
   100% { opacity: 0; transform: translate(var(--dx),var(--dy)) scale(0); }
 }
 
-/* ── Animasi masuk/keluar ── */
 @keyframes slideIn {
-  from { opacity: 0; transform: translateX(48px) scale(0.9); }
+  from { opacity: 0; transform: translateX(40px) scale(0.9); }
   to   { opacity: 1; transform: none; }
 }
 @keyframes slideOut {
   from { opacity: 1; transform: none; }
-  to   { opacity: 0; transform: translateX(64px) scale(0.88); }
+  to   { opacity: 0; transform: translateX(56px) scale(0.88); }
 }
 
-/* ── Status badge (muncul sementara saat connect/disconnect) ── */
 #status {
   position: fixed;
-  bottom: 12px; left: 12px;
-  font-size: 11px; font-weight: 700;
-  padding: 5px 12px; border-radius: 6px;
-  background: rgba(0,0,0,0.7);
+  bottom: 8px; left: 8px;
+  font-size: 10px; font-weight: 700;
+  padding: 4px 10px; border-radius: 5px;
+  background: rgba(0,0,0,0.75);
   color: rgba(255,255,255,0.5);
   font-family: monospace;
-  opacity: 0;
-  transition: opacity 0.3s;
+  opacity: 0; transition: opacity 0.3s;
   pointer-events: none;
 }
 #status.show { opacity: 1; }
@@ -233,21 +220,16 @@ html, body {
 <div id="status"></div>
 
 <script>
-// ══════════════════════════════════════════════
-// KONFIGURASI — ganti ini sesuai setup kamu
-// atau biarkan default, diatur dari dashboard
-// ══════════════════════════════════════════════
-const SERVER_URL = 'http://localhost:3000';  // ← jangan ubah kecuali port beda
+// SERVER_URL di-inject otomatis saat klik "Copy Widget Code" di dashboard
+const SERVER_URL = 'MASUKKAN_NGROK_URL_DI_DASHBOARD';
+
 let CFG = {
-  duration:    6000,   // ms tampil
-  queue_delay: 1000,   // ms jeda antar alert
+  duration:    6000,
+  queue_delay: 1000,
   position:    'bottom-right',
   sound:       true,
 };
 
-// ══════════════════════════════════════════════
-// DATA PROVIDER
-// ══════════════════════════════════════════════
 const PROV = {
   saweria:    { color: '#f5c842', icon: '💛', label: 'SAWERIA' },
   trakteer:   { color: '#e84393', icon: '🩷', label: 'TRAKTEER' },
@@ -256,19 +238,9 @@ const PROV = {
   custom:     { color: '#9b8dff', icon: '🔔', label: 'ALERT' },
 };
 
-const TYPE_ICON = {
-  donation: null, follow: '👤', subscription: '⭐',
-  resub: '⭐', bits: '💎', raid: '⚔️', host: '🏠',
-};
-const TYPE_LABEL = {
-  donation: 'DONASI', follow: 'FOLLOW BARU',
-  subscription: 'SUBSCRIBER', resub: 'RE-SUB',
-  bits: 'BITS', raid: 'RAID', host: 'HOST',
-};
+const TYPE_ICON  = { donation: null, follow: '👤', subscription: '⭐', resub: '⭐', bits: '💎', raid: '⚔️', host: '🏠' };
+const TYPE_LABEL = { donation: 'DONASI', follow: 'FOLLOW BARU', subscription: 'SUBSCRIBER', resub: 'RE-SUB', bits: 'BITS', raid: 'RAID', host: 'HOST' };
 
-// ══════════════════════════════════════════════
-// FORMAT CURRENCY
-// ══════════════════════════════════════════════
 function fmt(amount, currency) {
   if (amount === null || amount === undefined || amount === '') return null;
   const n = parseFloat(amount);
@@ -283,7 +255,7 @@ function fmt(amount, currency) {
   return String(n);
 }
 
-function isBigDonation(amount, currency) {
+function isBig(amount, currency) {
   if (!amount) return false;
   if (currency === 'IDR') return amount >= 100000;
   if (currency === 'USD') return amount >= 10;
@@ -295,53 +267,34 @@ function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ══════════════════════════════════════════════
-// QUEUE SYSTEM
-// ══════════════════════════════════════════════
-const wrap  = document.getElementById('wrap');
-let queue   = [];
-let running = false;
+const wrap = document.getElementById('wrap');
+let queue = [], running = false;
 
-function enqueue(alert) {
-  queue.push(alert);
-  if (!running) next();
-}
-
+function enqueue(a) { queue.push(a); if (!running) next(); }
 function next() {
-  if (queue.length === 0) { running = false; return; }
+  if (!queue.length) { running = false; return; }
   running = true;
   show(queue.shift());
 }
 
-// ══════════════════════════════════════════════
-// BUILD & SHOW CARD
-// ══════════════════════════════════════════════
 function show(alert) {
-  const prov     = PROV[alert.provider] || PROV.custom;
+  const prov      = PROV[alert.provider] || PROV.custom;
   const typeIcon  = TYPE_ICON[alert.type] ?? prov.icon;
   const typeLabel = TYPE_LABEL[alert.type] || (alert.type||'ALERT').toUpperCase();
   const amtStr    = fmt(alert.amount, alert.currency);
-  const big       = isBigDonation(alert.amount, alert.currency);
+  const big       = isBig(alert.amount, alert.currency);
   const cls       = PROV[alert.provider] ? alert.provider : 'custom';
 
   const card = document.createElement('div');
-  card.className = `card ${cls}`;
+  card.className = 'card ' + cls;
 
-  // Icon atau avatar
-  let iconHTML = '';
-  if (alert.avatar) {
-    iconHTML = `<img class="avatar-img" src="${esc(alert.avatar)}"
-      onerror="this.outerHTML='<div class=icon-wrap>${typeIcon}</div>'" alt="">`;
-  } else {
-    iconHTML = `<div class="icon-wrap">${typeIcon}</div>`;
-  }
+  const iconHTML = alert.avatar
+    ? `<img class="avatar-img" src="${esc(alert.avatar)}" onerror="this.outerHTML='<div class=icon-wrap>${typeIcon}</div>'" alt="">`
+    : `<div class="icon-wrap">${typeIcon}</div>`;
 
-  // Unit Trakteer
   let unitHTML = '';
   if (alert.unit && alert.quantity) {
-    const uico = alert.unit_icon
-      ? `<img src="${esc(alert.unit_icon)}" style="width:13px;height:13px;vertical-align:middle;margin-right:2px;">`
-      : '';
+    const uico = alert.unit_icon ? `<img src="${esc(alert.unit_icon)}" style="width:12px;height:12px;vertical-align:middle;margin-right:2px;">` : '';
     unitHTML = `<span class="unit-info">${uico}${esc(alert.quantity)}× ${esc(alert.unit)}</span>`;
   }
 
@@ -350,61 +303,42 @@ function show(alert) {
     <div class="content">
       <div class="row-top">
         <span class="from-name">${esc(alert.from)}</span>
-        ${amtStr
-          ? `<span class="amount">${amtStr}</span>`
-          : `<span class="type-badge">${typeLabel}</span>`}
+        ${amtStr ? `<span class="amount">${amtStr}</span>` : `<span class="type-badge">${typeLabel}</span>`}
       </div>
-      ${amtStr || unitHTML
-        ? `<div class="row-mid">
-            <span class="type-badge">${typeLabel}</span>
-            ${unitHTML}
-           </div>`
-        : ''}
-      ${alert.message
-        ? `<div class="message">${esc(alert.message)}</div>`
-        : ''}
+      ${amtStr || unitHTML ? `<div class="row-mid"><span class="type-badge">${typeLabel}</span>${unitHTML}</div>` : ''}
+      ${alert.message ? `<div class="message">${esc(alert.message)}</div>` : ''}
     </div>
-    <div class="bar" id="bar_${Date.now()}"></div>
-    ${big ? `<div class="particles" id="ptc_${Date.now()}"></div>` : ''}
+    <div class="bar"></div>
+    ${big ? '<div class="particles"></div>' : ''}
   `;
 
-  // Sisipkan di atas, max 3 card
   wrap.insertBefore(card, wrap.firstChild);
   const all = wrap.querySelectorAll('.card');
   if (all.length > 3) all[all.length-1].remove();
 
-  // Animasi progress bar
   const bar = card.querySelector('.bar');
   bar.style.transition = `width ${CFG.duration}ms linear`;
   requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.width = '0%'; }));
 
-  // Particle burst untuk donasi besar
   if (big) spawnParticles(card, prov.color);
-
-  // Suara
   if (CFG.sound) beep(alert.type);
 
-  // Auto remove
   setTimeout(() => {
     card.classList.add('out');
-    setTimeout(() => {
-      card.remove();
-      setTimeout(next, CFG.queue_delay);
-    }, 380);
+    setTimeout(() => { card.remove(); setTimeout(next, CFG.queue_delay); }, 380);
   }, CFG.duration);
 }
 
 function spawnParticles(card, color) {
   const ptc = card.querySelector('.particles');
   if (!ptc) return;
-  for (let i = 0; i < 18; i++) {
+  for (let i = 0; i < 16; i++) {
     const p = document.createElement('div');
     p.className = 'p';
-    p.style.background     = color;
-    p.style.left           = (30 + Math.random()*80) + 'px';
-    p.style.top            = (40 + Math.random()*40) + 'px';
-    const a = Math.random()*Math.PI*2;
-    const d = 35 + Math.random()*70;
+    p.style.background = color;
+    p.style.left = (30 + Math.random()*80) + 'px';
+    p.style.top  = (40 + Math.random()*40) + 'px';
+    const a = Math.random()*Math.PI*2, d = 35 + Math.random()*65;
     p.style.setProperty('--dx', Math.cos(a)*d + 'px');
     p.style.setProperty('--dy', Math.sin(a)*d + 'px');
     p.style.animationDelay = (Math.random()*0.25) + 's';
@@ -412,38 +346,24 @@ function spawnParticles(card, color) {
   }
 }
 
-// ══════════════════════════════════════════════
-// BEEP (Web Audio API)
-// ══════════════════════════════════════════════
 function beep(type) {
   try {
-    const ctx  = new (window.AudioContext||window.webkitAudioContext)();
-    const osc  = ctx.createOscillator();
-    const gain = ctx.createGain();
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
     osc.connect(gain); gain.connect(ctx.destination);
-    const notes = {
-      donation:     [523,659],
-      follow:       [440,523],
-      subscription: [523,659,784],
-      bits:         [659,784],
-    };
+    const notes = { donation:[523,659], follow:[440,523], subscription:[523,659,784], bits:[659,784] };
     const seq = notes[type] || [523,659];
     gain.gain.setValueAtTime(0.28, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.65);
     osc.type = 'sine';
     osc.frequency.setValueAtTime(seq[0], ctx.currentTime);
     if (seq[1]) osc.frequency.setValueAtTime(seq[1], ctx.currentTime+0.16);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime+0.65);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.65);
   } catch {}
 }
 
-// ══════════════════════════════════════════════
-// SSE — koneksi ke server lokal
-// ══════════════════════════════════════════════
 const statusEl = document.getElementById('status');
-let retries    = 0;
-let statusTimer;
+let retries = 0, statusTimer;
 
 function showStatus(msg) {
   statusEl.textContent = msg;
@@ -457,48 +377,31 @@ function applyConfig(cfg) {
   if (cfg.duration)    CFG.duration    = cfg.duration;
   if (cfg.queue_delay) CFG.queue_delay = cfg.queue_delay;
   if (typeof cfg.sound !== 'undefined') CFG.sound = cfg.sound;
-  if (cfg.position) {
-    wrap.className = cfg.position;
-    CFG.position   = cfg.position;
-  }
+  if (cfg.position) { wrap.className = cfg.position; CFG.position = cfg.position; }
 }
 
 function connect() {
   const es = new EventSource(SERVER_URL + '/events');
-
-  es.onopen = () => {
-    retries = 0;
-    showStatus('✓ Terhubung ke server');
-  };
-
+  es.onopen = () => { retries = 0; showStatus('✓ Terhubung'); };
   es.onmessage = (e) => {
     try {
       const d = JSON.parse(e.data);
-      if (d.type === 'ping') return;
-      if (d.type === 'connected') { showStatus('✓ SE Widget aktif'); return; }
-      if (d.type === 'CONFIG')    { applyConfig(d.config); return; }
-      // Event donasi/follow/dll → masukkan ke queue
+      if (d.type === 'ping' || d.type === 'connected') return;
+      if (d.type === 'CONFIG') { applyConfig(d.config); return; }
       enqueue(d);
     } catch {}
   };
-
   es.onerror = () => {
-    es.close();
-    retries++;
-    const delay = Math.min(2000 * retries, 15000);
-    showStatus(`⚠ Reconnecting... (${retries})`);
-    setTimeout(connect, delay);
+    es.close(); retries++;
+    showStatus('⚠ Reconnecting... (' + retries + ')');
+    setTimeout(connect, Math.min(2000 * retries, 15000));
   };
 }
 
-// Fetch config dulu dari server sebelum connect SSE
 fetch(SERVER_URL + '/api/config')
   .then(r => r.json())
-  .then(cfg => {
-    if (cfg.overlay) applyConfig(cfg.overlay);
-    connect();
-  })
-  .catch(() => connect()); // langsung connect walau config gagal
+  .then(cfg => { if (cfg.overlay) applyConfig(cfg.overlay); connect(); })
+  .catch(() => connect());
 </script>
 </body>
 </html>

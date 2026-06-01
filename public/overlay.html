@@ -1,437 +1,343 @@
 <!DOCTYPE html>
-<!-- Stream Alert Hub — overlay.html -->
-<!-- OBS: Browser Source → http://localhost:3000/overlay -->
-<!-- Width: 1920 | Height: 1080 | Transparent background -->
-<html lang="id">
+<!-- 
+  SE Alert Bridge — OBS Overlay
+  ================================
+  Tambahkan ke OBS sebagai Browser Source:
+  URL: http://localhost:3000/overlay
+  Width: 1920, Height: 1080
+  ✅ Transparan, tidak perlu ngrok!
+-->
+<html>
 <head>
 <meta charset="UTF-8">
-<title>SAH Overlay</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
 html, body {
-  width: 1920px; height: 1080px;
-  background: transparent;
+  width: 100%;
+  height: 100%;
+  background: transparent !important;
   overflow: hidden;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Segoe UI', sans-serif;
 }
 
-/* ── Alert Container (posisi bisa diubah dari config) ── */
-#alert-wrap {
-  position: absolute;
+#wrap {
+  position: fixed;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  z-index: 100;
+  gap: 10px;
   pointer-events: none;
+  z-index: 999;
 }
 
-/* Posisi presets */
-#alert-wrap.bottom-right  { bottom: 40px; right: 40px; align-items: flex-end; }
-#alert-wrap.bottom-left   { bottom: 40px; left: 40px;  align-items: flex-start; }
-#alert-wrap.top-right     { top: 40px;    right: 40px; align-items: flex-end; }
-#alert-wrap.top-left      { top: 40px;    left: 40px;  align-items: flex-start; }
-#alert-wrap.bottom-center { bottom: 40px; left: 50%;   transform: translateX(-50%); align-items: center; }
-#alert-wrap.top-center    { top: 40px;    left: 50%;   transform: translateX(-50%); align-items: center; }
+#wrap.bottom-right  { bottom: 30px; right: 30px;  align-items: flex-end; }
+#wrap.bottom-left   { bottom: 30px; left: 30px;   align-items: flex-start; }
+#wrap.top-right     { top: 30px;    right: 30px;  align-items: flex-end; }
+#wrap.top-left      { top: 30px;    left: 30px;   align-items: flex-start; }
+#wrap.bottom-center { bottom: 30px; left: 50%;    transform: translateX(-50%); align-items: center; }
+#wrap.top-center    { top: 30px;    left: 50%;    transform: translateX(-50%); align-items: center; }
 
-/* ── Alert Card ── */
-.alert-card {
+.card {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 22px;
-  border-radius: 16px;
-  min-width: 380px;
-  max-width: 520px;
+  gap: 14px;
+  padding: 14px 20px 18px;
+  border-radius: 14px;
+  min-width: 360px;
+  max-width: 500px;
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08);
-  animation: slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.07);
+  animation: slideIn 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards;
 }
+.card.out { animation: slideOut 0.35s ease-in forwards; }
 
-.alert-card.leaving {
-  animation: slideOut 0.35s ease-in forwards;
-}
+.card.saweria    { background: rgba(18,12,4,0.94);  border-left: 4px solid #f5c842; }
+.card.trakteer   { background: rgba(18,4,14,0.94);  border-left: 4px solid #e84393; }
+.card.sociabuzz  { background: rgba(4,12,22,0.94);  border-left: 4px solid #4394e8; }
+.card.streamlabs { background: rgba(4,18,8,0.94);   border-left: 4px solid #30e878; }
+.card.custom     { background: rgba(14,10,22,0.94); border-left: 4px solid #9b8dff; }
 
-/* ── Provider color themes ── */
-.alert-card.saweria    { background: rgba(20,14,6,0.92); border-left: 4px solid #f5c842; }
-.alert-card.trakteer   { background: rgba(18,6,14,0.92); border-left: 4px solid #e84393; }
-.alert-card.sociabuzz  { background: rgba(6,14,20,0.92); border-left: 4px solid #4394e8; }
-.alert-card.streamlabs { background: rgba(7,16,8,0.92);  border-left: 4px solid #30e878; }
-
-/* Glow effect di sisi kiri */
-.alert-card::before {
+.card::before {
   content: '';
   position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 120px;
-  opacity: 0.07;
-  pointer-events: none;
+  left: 0; top: 0; bottom: 0; width: 120px;
+  opacity: 0.08; pointer-events: none;
 }
-.alert-card.saweria::before    { background: radial-gradient(ellipse at left, #f5c842, transparent); }
-.alert-card.trakteer::before   { background: radial-gradient(ellipse at left, #e84393, transparent); }
-.alert-card.sociabuzz::before  { background: radial-gradient(ellipse at left, #4394e8, transparent); }
-.alert-card.streamlabs::before { background: radial-gradient(ellipse at left, #30e878, transparent); }
+.card.saweria::before    { background: radial-gradient(ellipse at left, #f5c842, transparent); }
+.card.trakteer::before   { background: radial-gradient(ellipse at left, #e84393, transparent); }
+.card.sociabuzz::before  { background: radial-gradient(ellipse at left, #4394e8, transparent); }
+.card.streamlabs::before { background: radial-gradient(ellipse at left, #30e878, transparent); }
+.card.custom::before     { background: radial-gradient(ellipse at left, #9b8dff, transparent); }
 
-/* ── Provider Badge ── */
-.provider-badge {
-  width: 48px;
-  height: 48px;
+.icon-wrap {
+  width: 48px; height: 48px;
   border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
 }
-.saweria    .provider-badge { background: rgba(245,200,66,0.15); }
-.trakteer   .provider-badge { background: rgba(232,67,147,0.15); }
-.sociabuzz  .provider-badge { background: rgba(67,148,232,0.15); }
-.streamlabs .provider-badge { background: rgba(48,232,120,0.15); }
+.saweria    .icon-wrap { background: rgba(245,200,66,0.15); }
+.trakteer   .icon-wrap { background: rgba(232,67,147,0.15); }
+.sociabuzz  .icon-wrap { background: rgba(67,148,232,0.15); }
+.streamlabs .icon-wrap { background: rgba(48,232,120,0.15); }
+.custom     .icon-wrap { background: rgba(155,141,255,0.15); }
 
-/* ── Avatar ── */
-.avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  object-fit: cover;
+.avatar-img {
+  width: 48px; height: 48px;
+  border-radius: 50%; object-fit: cover;
   flex-shrink: 0;
-  border: 2px solid rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.12);
 }
 
-/* ── Content ── */
-.alert-content { flex: 1; min-width: 0; }
+.content { flex: 1; min-width: 0; }
 
-.alert-header {
-  display: flex;
-  align-items: center;
+.row-top {
+  display: flex; align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: 10px; margin-bottom: 4px;
 }
 
-.alert-from {
-  font-size: 17px;
-  font-weight: 800;
-  color: #ffffff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 220px;
+.from-name {
+  font-size: 17px; font-weight: 800;
+  color: #fff;
+  white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; max-width: 210px;
 }
 
-.alert-amount {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 16px;
-  font-weight: 500;
-  white-space: nowrap;
-  flex-shrink: 0;
+.amount {
+  font-family: 'Courier New', monospace;
+  font-size: 16px; font-weight: 600;
+  white-space: nowrap; flex-shrink: 0;
 }
-.saweria    .alert-amount { color: #f5c842; }
-.trakteer   .alert-amount { color: #e84393; }
-.sociabuzz  .alert-amount { color: #4394e8; }
-.streamlabs .alert-amount { color: #30e878; }
+.saweria    .amount { color: #f5c842; }
+.trakteer   .amount { color: #e84393; }
+.sociabuzz  .amount { color: #4394e8; }
+.streamlabs .amount { color: #30e878; }
+.custom     .amount { color: #9b8dff; }
 
-.alert-type-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  padding: 2px 7px;
-  border-radius: 4px;
-  color: rgba(255,255,255,0.5);
-  background: rgba(255,255,255,0.05);
+.type-badge {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 4px;
+  color: rgba(255,255,255,0.45);
+  background: rgba(255,255,255,0.06);
   flex-shrink: 0;
 }
 
-.alert-message {
-  font-size: 13px;
-  color: rgba(255,255,255,0.7);
-  line-height: 1.5;
-  word-break: break-word;
+.row-mid { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.unit-info { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+.message {
+  font-size: 13px; color: rgba(255,255,255,0.7);
+  line-height: 1.5; word-break: break-word;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* Progress bar (timer) */
-.alert-progress {
-  position: absolute;
-  bottom: 0; left: 0;
-  height: 3px;
-  border-radius: 0 0 0 16px;
-  transition: width linear;
+.bar {
+  position: absolute; bottom: 0; left: 0;
+  height: 3px; width: 100%; transition: width linear;
 }
-.saweria    .alert-progress { background: #f5c842; }
-.trakteer   .alert-progress { background: #e84393; }
-.sociabuzz  .alert-progress { background: #4394e8; }
-.streamlabs .alert-progress { background: #30e878; }
+.saweria    .bar { background: #f5c842; }
+.trakteer   .bar { background: #e84393; }
+.sociabuzz  .bar { background: #4394e8; }
+.streamlabs .bar { background: #30e878; }
+.custom     .bar { background: #9b8dff; }
 
-/* ── Event-specific styles ── */
-.event-follow .provider-badge { font-size: 28px; }
-.event-subscription .provider-badge { font-size: 28px; }
-.event-bits .provider-badge { font-size: 24px; }
+.particles {
+  position: absolute; inset: 0;
+  pointer-events: none; overflow: hidden; border-radius: 14px;
+}
+.p {
+  position: absolute;
+  width: 6px; height: 6px; border-radius: 50%;
+  opacity: 0; animation: pop 0.9s ease-out forwards;
+}
+@keyframes pop {
+  0%   { opacity: 1; transform: translate(0,0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx),var(--dy)) scale(0); }
+}
 
-/* ── Animations ── */
 @keyframes slideIn {
-  from { opacity: 0; transform: translateX(40px) scale(0.92); }
-  to   { opacity: 1; transform: translateX(0) scale(1); }
+  from { opacity: 0; transform: translateX(40px) scale(0.9); }
+  to   { opacity: 1; transform: none; }
 }
 @keyframes slideOut {
-  from { opacity: 1; transform: translateX(0) scale(1); }
-  to   { opacity: 0; transform: translateX(60px) scale(0.88); }
-}
-
-/* Particle burst for big donations */
-.burst {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-  border-radius: 16px;
-}
-.particle {
-  position: absolute;
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  animation: burst-anim 0.8s ease-out forwards;
-  opacity: 0;
-}
-@keyframes burst-anim {
-  0%   { opacity: 1; transform: translate(0,0) scale(1); }
-  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateX(56px) scale(0.88); }
 }
 </style>
 </head>
 <body>
-<div id="alert-wrap" class="bottom-right"></div>
+
+<div id="wrap" class="bottom-right"></div>
 
 <script>
-const SERVER = 'http://localhost:3000';
-const wrap   = document.getElementById('alert-wrap');
+// ✅ Connect langsung ke localhost — tidak perlu ngrok!
+const SERVER_URL = 'http://localhost:3000';
 
-// Config dari server
-let CFG = { duration: 6000, position: 'bottom-right', sound: true, queue_delay: 1000 };
+let CFG = { duration: 6000, queue_delay: 1000, position: 'bottom-right', sound: true };
 
-// Queue agar notifikasi tampil bergantian
-let queue   = [];
-let showing = false;
-
-// Provider info
-const PROVIDERS = {
-  saweria:    { label: 'SAWERIA',    color: '#f5c842', icon: '💛' },
-  trakteer:   { label: 'TRAKTEER',  color: '#e84393', icon: '🩷' },
-  sociabuzz:  { label: 'SOCIABUZZ', color: '#4394e8', icon: '💙' },
-  streamlabs: { label: 'STREAMLABS',color: '#30e878', icon: '🎮' },
+const PROV = {
+  saweria:    { color: '#f5c842', icon: '💛', label: 'SAWERIA' },
+  trakteer:   { color: '#e84393', icon: '🩷', label: 'TRAKTEER' },
+  sociabuzz:  { color: '#4394e8', icon: '💙', label: 'SOCIABUZZ' },
+  streamlabs: { color: '#30e878', icon: '🎮', label: 'STREAMLABS' },
+  custom:     { color: '#9b8dff', icon: '🔔', label: 'ALERT' },
 };
 
-const TYPE_ICONS = {
-  donation:     null, // pakai provider icon
-  follow:       '👤',
-  subscription: '⭐',
-  resub:        '⭐',
-  bits:         '💎',
-  raid:         '⚔️',
-};
+const TYPE_ICON  = { donation: null, follow: '👤', subscription: '⭐', resub: '⭐', bits: '💎', raid: '⚔️' };
+const TYPE_LABEL = { donation: 'DONASI', follow: 'FOLLOW BARU', subscription: 'SUBSCRIBER', resub: 'RE-SUB', bits: 'BITS', raid: 'RAID' };
 
-const TYPE_LABELS = {
-  donation:     'DONASI',
-  follow:       'FOLLOW BARU',
-  subscription: 'SUBSCRIBER',
-  resub:        'RE-SUB',
-  bits:         'BITS',
-  raid:         'RAID',
-};
-
-// Format currency
 function fmt(amount, currency) {
-  if (!amount && amount !== 0) return null;
+  if (amount === null || amount === undefined || amount === '') return null;
+  const n = parseFloat(amount);
+  if (isNaN(n) || n === 0) return null;
   if (currency === 'IDR') {
-    if (amount >= 1000000) return 'Rp ' + (amount/1000000).toFixed(1) + 'jt';
-    if (amount >= 1000)    return 'Rp ' + Math.round(amount/1000) + 'k';
-    return 'Rp ' + amount.toLocaleString('id-ID');
+    if (n >= 1000000) return 'Rp ' + (n/1000000).toFixed(1).replace('.0','') + 'jt';
+    if (n >= 1000)    return 'Rp ' + Math.round(n/1000) + 'k';
+    return 'Rp ' + n.toLocaleString('id-ID');
   }
-  if (currency === 'bits') return amount + ' bits';
-  if (currency === 'USD')  return '$' + parseFloat(amount).toFixed(2);
-  return amount;
+  if (currency === 'bits') return n + ' bits';
+  if (currency === 'USD')  return '$' + n.toFixed(2);
+  return String(n);
 }
 
-// Buat card HTML
-function buildCard(alert) {
-  const prov = PROVIDERS[alert.provider] || { label: alert.provider?.toUpperCase(), color: '#aaa', icon: '🔔' };
-  const typeIcon  = TYPE_ICONS[alert.type] || prov.icon;
-  const typeLabel = TYPE_LABELS[alert.type] || alert.type?.toUpperCase() || 'NOTIF';
-  const amountStr = fmt(alert.amount, alert.currency);
-  const isBig     = alert.currency === 'IDR' ? alert.amount >= 100000 : alert.amount >= 10;
+function isBig(a, c) {
+  if (!a) return false;
+  return (c === 'IDR' && a >= 100000) || (c === 'USD' && a >= 10) || (c === 'bits' && a >= 500);
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+const wrap = document.getElementById('wrap');
+let queue = [], running = false;
+
+function enqueue(a) { queue.push(a); if (!running) next(); }
+function next() {
+  if (!queue.length) { running = false; return; }
+  running = true;
+  show(queue.shift());
+}
+
+function show(alert) {
+  const prov      = PROV[alert.provider] || PROV.custom;
+  const typeIcon  = TYPE_ICON[alert.type] ?? prov.icon;
+  const typeLabel = TYPE_LABEL[alert.type] || (alert.type||'ALERT').toUpperCase();
+  const amtStr    = fmt(alert.amount, alert.currency);
+  const big       = isBig(alert.amount, alert.currency);
+  const cls       = PROV[alert.provider] ? alert.provider : 'custom';
 
   const card = document.createElement('div');
-  card.className = `alert-card ${alert.provider} event-${alert.type}`;
+  card.className = 'card ' + cls;
 
-  // Avatar / icon
-  let iconHtml = '';
-  if (alert.avatar) {
-    iconHtml = `<img class="avatar" src="${alert.avatar}" onerror="this.outerHTML='<div class=provider-badge>${typeIcon}</div>'" alt="">`;
-  } else {
-    iconHtml = `<div class="provider-badge">${typeIcon}</div>`;
-  }
+  const iconHTML = alert.avatar
+    ? `<img class="avatar-img" src="${esc(alert.avatar)}" onerror="this.outerHTML='<div class=icon-wrap>${typeIcon}</div>'" alt="">`
+    : `<div class="icon-wrap">${typeIcon}</div>`;
 
-  // Unit info untuk Trakteer
-  let unitHtml = '';
+  let unitHTML = '';
   if (alert.unit && alert.quantity) {
-    const unitIcon = alert.unit_icon ? `<img src="${alert.unit_icon}" style="width:14px;height:14px;vertical-align:middle;margin-right:3px;">` : '';
-    unitHtml = `<span style="font-size:11px;color:rgba(255,255,255,0.45);margin-left:6px;">${unitIcon}${alert.quantity}x ${alert.unit}</span>`;
+    unitHTML = `<span class="unit-info">${esc(alert.quantity)}× ${esc(alert.unit)}</span>`;
   }
 
   card.innerHTML = `
-    ${iconHtml}
-    <div class="alert-content">
-      <div class="alert-header">
-        <span class="alert-from">${esc(alert.from)}</span>
-        ${amountStr ? `<span class="alert-amount">${amountStr}</span>` : `<span class="alert-type-label">${typeLabel}</span>`}
+    ${iconHTML}
+    <div class="content">
+      <div class="row-top">
+        <span class="from-name">${esc(alert.from)}</span>
+        ${amtStr ? `<span class="amount">${amtStr}</span>` : `<span class="type-badge">${typeLabel}</span>`}
       </div>
-      ${amountStr ? `<div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;"><span class="alert-type-label">${typeLabel}</span>${unitHtml}</div>` : ''}
-      ${alert.message ? `<div class="alert-message">${esc(alert.message)}</div>` : ''}
+      ${amtStr || unitHTML ? `<div class="row-mid"><span class="type-badge">${typeLabel}</span>${unitHTML}</div>` : ''}
+      ${alert.message ? `<div class="message">${esc(alert.message)}</div>` : ''}
     </div>
-    <div class="alert-progress" id="prog_${Date.now()}" style="width:100%"></div>
-    ${isBig ? '<div class="burst" id="burst_' + Date.now() + '"></div>' : ''}
+    <div class="bar"></div>
+    ${big ? '<div class="particles"></div>' : ''}
   `;
 
-  // Big donation particle burst
-  if (isBig) {
-    setTimeout(() => spawnParticles(card, prov.color), 100);
-  }
+  wrap.insertBefore(card, wrap.firstChild);
+  const all = wrap.querySelectorAll('.card');
+  if (all.length > 3) all[all.length-1].remove();
 
-  return card;
+  const bar = card.querySelector('.bar');
+  bar.style.transition = `width ${CFG.duration}ms linear`;
+  requestAnimationFrame(() => requestAnimationFrame(() => { bar.style.width = '0%'; }));
+
+  if (big) spawnParticles(card, prov.color);
+  if (CFG.sound) beep(alert.type);
+
+  setTimeout(() => {
+    card.classList.add('out');
+    setTimeout(() => { card.remove(); setTimeout(next, CFG.queue_delay); }, 380);
+  }, CFG.duration);
 }
 
 function spawnParticles(card, color) {
-  const burst = card.querySelector('.burst');
-  if (!burst) return;
+  const ptc = card.querySelector('.particles');
+  if (!ptc) return;
   for (let i = 0; i < 16; i++) {
     const p = document.createElement('div');
-    p.className = 'particle';
+    p.className = 'p';
     p.style.background = color;
-    p.style.left = (40 + Math.random() * 60) + 'px';
-    p.style.top  = (50 + Math.random() * 30) + 'px';
-    const angle = (Math.random() * 360) * Math.PI / 180;
-    const dist  = 40 + Math.random() * 60;
-    p.style.setProperty('--dx', Math.cos(angle)*dist + 'px');
-    p.style.setProperty('--dy', Math.sin(angle)*dist + 'px');
-    p.style.animationDelay = (Math.random() * 0.2) + 's';
-    burst.appendChild(p);
+    p.style.left = (30 + Math.random()*80) + 'px';
+    p.style.top  = (40 + Math.random()*40) + 'px';
+    const a = Math.random()*Math.PI*2, d = 35 + Math.random()*65;
+    p.style.setProperty('--dx', Math.cos(a)*d + 'px');
+    p.style.setProperty('--dy', Math.sin(a)*d + 'px');
+    p.style.animationDelay = (Math.random()*0.25) + 's';
+    ptc.appendChild(p);
   }
 }
 
-// Queue processor
-function processQueue() {
-  if (showing || queue.length === 0) return;
-  showing = true;
-  const alert = queue.shift();
-  showAlert(alert);
-}
-
-function showAlert(alert) {
-  const card = buildCard(alert);
-  wrap.insertBefore(card, wrap.firstChild);
-
-  // Progress bar animation
-  const prog = card.querySelector('.alert-progress');
-  if (prog) {
-    prog.style.transition = `width ${CFG.duration}ms linear`;
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => { prog.style.width = '0%'; });
-    });
-  }
-
-  // Play sound (kalau ada)
-  if (CFG.sound) playSound(alert);
-
-  // Auto remove
-  setTimeout(() => {
-    card.classList.add('leaving');
-    setTimeout(() => {
-      card.remove();
-      showing = false;
-      setTimeout(processQueue, CFG.queue_delay);
-    }, 350);
-  }, CFG.duration);
-
-  // Max 3 cards visible
-  const cards = wrap.querySelectorAll('.alert-card');
-  if (cards.length > 3) cards[cards.length - 1].remove();
-}
-
-function playSound(alert) {
-  // Tone.js tidak tersedia, pakai Web Audio API sederhana
+function beep(type) {
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    const freqs = { donation: [523, 659], follow: [440, 523], subscription: [523, 659, 784], bits: [659, 784] };
-    const notes = freqs[alert.type] || [523, 659];
-
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    const notes = { donation:[523,659], follow:[440,523], subscription:[523,659,784], bits:[659,784] };
+    const seq = notes[type] || [523,659];
+    gain.gain.setValueAtTime(0.28, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.65);
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(notes[0], ctx.currentTime);
-    if (notes[1]) osc.frequency.setValueAtTime(notes[1], ctx.currentTime + 0.15);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.6);
+    osc.frequency.setValueAtTime(seq[0], ctx.currentTime);
+    if (seq[1]) osc.frequency.setValueAtTime(seq[1], ctx.currentTime+0.16);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime+0.65);
   } catch {}
-}
-
-// SSE connection
-let retries = 0;
-function connect() {
-  const es = new EventSource(SERVER + '/api/events');
-
-  es.onopen = () => { retries = 0; };
-
-  es.onmessage = (e) => {
-    try {
-      const d = JSON.parse(e.data);
-      if (d.type === 'ping') return;
-      if (d.type === 'CONFIG') {
-        applyConfig(d.config);
-        return;
-      }
-      // Push ke queue
-      queue.push(d);
-      processQueue();
-    } catch {}
-  };
-
-  es.onerror = () => {
-    es.close();
-    retries++;
-    setTimeout(connect, Math.min(2000 * retries, 15000));
-  };
 }
 
 function applyConfig(cfg) {
   if (!cfg) return;
-  if (cfg.duration) CFG.duration = cfg.duration;
-  if (cfg.position) {
-    wrap.className = '';
-    wrap.classList.add(cfg.position);
-    CFG.position = cfg.position;
-  }
-  if (typeof cfg.sound !== 'undefined') CFG.sound = cfg.sound;
+  if (cfg.duration)    CFG.duration    = cfg.duration;
   if (cfg.queue_delay) CFG.queue_delay = cfg.queue_delay;
+  if (typeof cfg.sound !== 'undefined') CFG.sound = cfg.sound;
+  if (cfg.position) { wrap.className = cfg.position; CFG.position = cfg.position; }
 }
 
-function esc(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+let retries = 0;
+function connect() {
+  const es = new EventSource(SERVER_URL + '/events');
+  es.onopen = () => { retries = 0; };
+  es.onmessage = (e) => {
+    try {
+      const d = JSON.parse(e.data);
+      if (d.type === 'CONFIG') { applyConfig(d.config); return; }
+      if (d.type === 'connected' || d.type === 'ping') return;
+      enqueue(d);
+    } catch {}
+  };
+  es.onerror = () => {
+    es.close(); retries++;
+    setTimeout(connect, Math.min(2000 * retries, 15000));
+  };
 }
 
-connect();
+fetch(SERVER_URL + '/api/config')
+  .then(r => r.json())
+  .then(cfg => { if (cfg.overlay) applyConfig(cfg.overlay); connect(); })
+  .catch(() => connect());
 </script>
 </body>
 </html>

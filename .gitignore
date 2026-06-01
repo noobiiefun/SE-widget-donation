@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Config lokal (berisi ngrok URL & token pribadi — JANGAN diupload!)
+config.json
+
+# ngrok executable
+ngrok.exe
+ngrok
+
+# Log files
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Environment
+.env
+.env.local
+
+# Git
+.git/
