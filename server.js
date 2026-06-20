@@ -1,12 +1,12 @@
-// SE Alert Bridge — server.js v2.0
-// Mendukung dua mode:
-//   1. OBS langsung → http://localhost:3000/overlay  (PALING MUDAH, tidak perlu ngrok)
-//   2. SE Custom Widget → pakai ngrok URL
+// SE Alert Bridge — server.js v3.0
+// Saweria / Trakteer / SociaBuzz → forward ke Streamlabs sebagai tip
+// Notifikasi muncul di Streamlabs Alert Box → OBS 1 Browser Source
 
 const express = require('express');
 const cors    = require('cors');
 const crypto  = require('crypto');
 const http    = require('http');
+const https   = require('https');
 const path    = require('path');
 const fs      = require('fs');
 const os      = require('os');
@@ -22,16 +22,14 @@ function loadConfig() {
   catch {
     const def = {
       ngrokUrl:   '',
+      streamlabs: {
+        enabled:       false,
+        socket_token:  '',
+        access_token:  '',
+      },
       saweria:    { enabled: false, stream_key: '' },
       trakteer:   { enabled: false },
       sociabuzz:  { enabled: false },
-      streamlabs: { enabled: false, socket_token: '' },
-      overlay: {
-        position:    'bottom-right',
-        duration:    6000,
-        queue_delay: 1000,
-        sound:       true,
-      },
     };
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(def, null, 2));
     return def;
@@ -42,18 +40,91 @@ function saveConfig(data) {
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2));
 }
 
-// ── SSE Clients ───────────────────────────────────────────
-const clients = new Set();
+// ── Push tip ke Streamlabs API ────────────────────────────
+async function pushToStreamlabs(data) {
+  const cfg   = loadConfig();
+  const token = cfg.streamlabs?.access_token;
 
-function pushEvent(alert) {
-  const msg = 'data:' + JSON.stringify(alert) + '\n\n';
-  const dead = [];
-  clients.forEach(res => {
-    try { res.write(msg); }
-    catch { dead.push(res); }
+  if (!token) {
+    console.warn('[Streamlabs] ⚠ access_token belum diset — skip push');
+    return false;
+  }
+
+  const providerLabel = {
+    saweria:   'Saweria',
+    trakteer:  'Trakteer',
+    sociabuzz: 'SociaBuzz',
+  }[data.provider] || data.provider;
+
+  // Streamlabs tip API hanya USD — pakai 0.01 agar trigger alert
+  // Info nominal asli ditaruh di pesan
+  const tipAmount = data.currency === 'USD'
+    ? (parseFloat(data.amount) || 0.01).toFixed(2)
+    : '0.01';
+
+  // Susun pesan: nominal asli + pesan donatur
+  let tipMessage = '';
+  if (data.currency === 'IDR' && data.amount) {
+    const fmt = Number(data.amount) >= 1000
+      ? 'Rp ' + Math.round(Number(data.amount)/1000) + 'k'
+      : 'Rp ' + Number(data.amount).toLocaleString('id-ID');
+    tipMessage += fmt;
+  } else if (data.unit && data.quantity) {
+    tipMessage += `${data.quantity}x ${data.unit}`;
+  }
+  if (data.message) {
+    tipMessage += tipMessage ? ` — ${data.message}` : data.message;
+  }
+
+  // Nama donatur + provider di dalam kurung
+  const tipName = `${data.from} [${providerLabel}]`;
+
+  const postData = new URLSearchParams({
+    access_token: token,
+    type:         'donation',
+    name:         tipName,
+    amount:       tipAmount,
+    currency:     'USD',
+    message:      tipMessage,
+    identifier:   `hsnm_${Date.now()}`,
+    created_at:   Math.floor(Date.now() / 1000).toString(),
+  }).toString();
+
+  return new Promise((resolve) => {
+    const req = https.request({
+      hostname: 'streamlabs.com',
+      path:     '/api/v2.0/donations',
+      method:   'POST',
+      headers:  {
+        'Content-Type':   'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(postData),
+      },
+    }, (res) => {
+      let body = '';
+      res.on('data', c => body += c);
+      res.on('end', () => {
+        try {
+          const json = JSON.parse(body);
+          if (json.donation_id) {
+            console.log(`[Streamlabs] ✅ ${tipName} | ${tipMessage} | id:${json.donation_id}`);
+            resolve(true);
+          } else {
+            console.error('[Streamlabs] ❌ Gagal:', body);
+            resolve(false);
+          }
+        } catch {
+          console.error('[Streamlabs] ❌ Parse error:', body);
+          resolve(false);
+        }
+      });
+    });
+    req.on('error', e => {
+      console.error('[Streamlabs] ❌ Request error:', e.message);
+      resolve(false);
+    });
+    req.write(postData);
+    req.end();
   });
-  dead.forEach(r => clients.delete(r));
-  console.log(`[ALERT] ${alert.provider} | ${alert.type} | "${alert.from}" | ${alert.amount ?? '-'} ${alert.currency ?? ''} | clients: ${clients.size}`);
 }
 
 // ── Middleware ────────────────────────────────────────────
@@ -70,62 +141,9 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ── Routes ────────────────────────────────────────────────
-app.get('/', (_, r) => r.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
-
-// ── OVERLAY langsung untuk OBS (tidak perlu ngrok!) ───────
-// Buka di OBS Browser Source: http://localhost:3000/overlay
-app.get('/overlay', (_, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'overlay.html'));
-});
-
-// ── Widget code untuk SE (inject ngrok URL otomatis) ──────
-app.get('/widget-code', (_, res) => {
-  const cfg      = loadConfig();
-  const ngrokUrl = (cfg.ngrokUrl || '').trim().replace(/\/$/, '');
-  const file     = path.join(__dirname, 'public', 'se-widget.html');
-  let html       = fs.readFileSync(file, 'utf8');
-
-  // Inject ngrok URL ke SERVER_URL
-  html = html.replace(
-    /const SERVER_URL\s*=\s*['"][^'"]*['"]/,
-    `const SERVER_URL = '${ngrokUrl || 'MASUKKAN_NGROK_URL_DI_DASHBOARD'}'`
-  );
-
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-  res.send(html);
-});
-
-// ── SSE endpoint — widget connect ke sini ────────────────
-app.get('/events', (req, res) => {
-  res.writeHead(200, {
-    'Content-Type':                'text/event-stream',
-    'Cache-Control':               'no-cache, no-transform',
-    'Connection':                  'keep-alive',
-    'Access-Control-Allow-Origin': '*',
-    'X-Accel-Buffering':           'no',
-  });
-
-  res.write(':ok\n\n');
-  clients.add(res);
-  console.log(`[SSE] +1 client terhubung (total: ${clients.size})`);
-
-  // Kirim config ke client baru
-  const cfg = loadConfig();
-  res.write('data:' + JSON.stringify({ type: 'CONFIG', config: cfg.overlay }) + '\n\n');
-  res.write('data:{"type":"connected"}\n\n');
-
-  const ping = setInterval(() => {
-    try { res.write(':ping\n\n'); }
-    catch { clearInterval(ping); clients.delete(res); }
-  }, 25000);
-
-  req.on('close', () => {
-    clearInterval(ping);
-    clients.delete(res);
-    console.log(`[SSE] -1 client (total: ${clients.size})`);
-  });
-});
+// ── Pages ─────────────────────────────────────────────────
+app.get('/',        (_, r) => r.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
+app.get('/overlay', (_, r) => r.sendFile(path.join(__dirname, 'public', 'overlay.html')));
 
 // ── Config API ────────────────────────────────────────────
 app.get('/api/config', (_, res) => res.json(loadConfig()));
@@ -137,107 +155,76 @@ app.post('/api/config', (req, res) => {
   if (body.ngrokUrl !== undefined)
     cfg.ngrokUrl = body.ngrokUrl.trim().replace(/\/$/, '');
 
-  ['saweria','trakteer','sociabuzz','streamlabs','overlay'].forEach(k => {
+  ['saweria','trakteer','sociabuzz','streamlabs'].forEach(k => {
     if (body[k]) cfg[k] = { ...cfg[k], ...body[k] };
   });
 
   saveConfig(cfg);
-  if (body.streamlabs) restartStreamlabs();
-
-  // Broadcast config baru ke semua client
-  const updated = loadConfig();
-  clients.forEach(r => {
-    try { r.write('data:' + JSON.stringify({ type: 'CONFIG', config: updated.overlay }) + '\n\n'); } catch {}
-  });
+  if (body.streamlabs?.socket_token) restartStreamlabsSocket();
   res.json({ ok: true });
+});
+
+app.post('/api/ngrok', (req, res) => {
+  const cfg = loadConfig();
+  cfg.ngrokUrl = (req.body.url || '').trim().replace(/\/$/, '');
+  saveConfig(cfg);
+  res.json({ ok: true, ngrokUrl: cfg.ngrokUrl });
 });
 
 // ── Status API ────────────────────────────────────────────
 app.get('/api/status', (_, res) => {
   const cfg = loadConfig();
   res.json({
-    version:           '2.0.0',
-    clients_connected: clients.size,
-    local_ip:          getLocalIP(),
-    ngrok_url:         cfg.ngrokUrl || null,
-    ngrok_configured:  !!cfg.ngrokUrl,
-    overlay_url:       `http://localhost:3000/overlay`,
-    saweria_enabled:   cfg.saweria?.enabled || false,
-    saweria_has_key:   !!(cfg.saweria?.stream_key),
+    version:            '3.0.0',
+    ngrok_url:          cfg.ngrokUrl || null,
+    ngrok_configured:   !!cfg.ngrokUrl,
+    streamlabs_token:   !!(cfg.streamlabs?.access_token),
+    streamlabs_socket:  !!(cfg.streamlabs?.socket_token),
+    streamlabs_enabled: cfg.streamlabs?.enabled || false,
+    saweria_enabled:    cfg.saweria?.enabled || false,
+    trakteer_enabled:   cfg.trakteer?.enabled || false,
+    sociabuzz_enabled:  cfg.sociabuzz?.enabled || false,
   });
 });
 
 // ── Test Alert ────────────────────────────────────────────
-app.post('/api/test', (req, res) => {
-  const samples = {
-    saweria: {
-      provider:'saweria', type:'donation',
-      from:'Tester Saweria', amount:69420, currency:'IDR',
-      message:'Test donasi dari Saweria! Semangat streaming!',
-      timestamp: new Date().toISOString(),
-    },
-    trakteer: {
-      provider:'trakteer', type:'donation',
-      from:'Tester Trakteer', amount:5000, currency:'IDR',
-      unit:'Cendol', quantity:2,
-      message:'Test dari Trakteer!',
-      timestamp: new Date().toISOString(),
-    },
-    sociabuzz: {
-      provider:'sociabuzz', type:'donation',
-      from:'Tester SociaBuzz', amount:20000, currency:'IDR',
-      message:'Test dari SociaBuzz!',
-      timestamp: new Date().toISOString(),
-    },
-    streamlabs: {
-      provider:'streamlabs', type:'donation',
-      from:'Tester Streamlabs', amount:5, currency:'USD',
-      message:'Test dari Streamlabs!',
-      timestamp: new Date().toISOString(),
-    },
-    follow: {
-      provider:'streamlabs', type:'follow',
-      from:'NewFollower123', amount:null, currency:null, message:'',
-      timestamp: new Date().toISOString(),
-    },
-    subscription: {
-      provider:'streamlabs', type:'subscription',
-      from:'SubBaru', amount:null, currency:null,
-      message:'Sub baru!', months:3,
-      timestamp: new Date().toISOString(),
-    },
+app.post('/api/test', async (req, res) => {
+  const provider = req.body?.provider || 'saweria';
+  const samples  = {
+    saweria:   { provider:'saweria',   from:'Tester Saweria',   amount:69420, currency:'IDR', message:'Test donasi dari Saweria!' },
+    trakteer:  { provider:'trakteer',  from:'Tester Trakteer',  amount:5000,  currency:'IDR', unit:'Cendol', quantity:2, message:'Test dari Trakteer!' },
+    sociabuzz: { provider:'sociabuzz', from:'Tester SociaBuzz', amount:20000, currency:'IDR', message:'Test dari SociaBuzz!' },
   };
-  const alert = samples[req.body?.provider] || samples.saweria;
-  console.log(`[TEST] Kirim: ${alert.provider}, clients aktif: ${clients.size}`);
-  pushEvent(alert);
-  res.json({ ok: true, sent: alert, clients_count: clients.size });
+  const alert = samples[provider] || samples.saweria;
+  console.log(`[TEST] Push ke Streamlabs: ${alert.provider}`);
+  const ok = await pushToStreamlabs(alert);
+  res.json({
+    ok,
+    sent: alert,
+    note: ok
+      ? '✅ Berhasil! Cek Alert Box Streamlabs di OBS kamu.'
+      : '❌ Gagal — pastikan access_token sudah diset dan benar.',
+  });
 });
 
 // ═══════════════════════════════════════════════════════
-// SAWERIA WEBHOOK
+// WEBHOOK SAWERIA
 // ═══════════════════════════════════════════════════════
-app.post('/webhook/saweria', (req, res) => {
-  const cfg    = loadConfig();
+app.post('/webhook/saweria', async (req, res) => {
+  const cfg     = loadConfig();
   const rawBody = req.body;
-
   let bodyStr;
   try {
     bodyStr = Buffer.isBuffer(rawBody) ? rawBody.toString('utf8') : JSON.stringify(rawBody);
   } catch { return res.sendStatus(400); }
 
-  // Verifikasi signature (opsional, tidak block kalau gagal)
   const sig = req.headers['saweria-callback-signature'];
   if (sig && cfg.saweria?.stream_key) {
     const expected = crypto
       .createHmac('sha256', cfg.saweria.stream_key.trim())
       .update(Buffer.isBuffer(rawBody) ? rawBody : Buffer.from(bodyStr))
       .digest('hex');
-    if (sig === expected) {
-      console.log('[Saweria] ✓ Signature valid');
-    } else {
-      // TIDAK return 401 — tetap proses agar donasi masuk
-      console.warn('[Saweria] ⚠ Signature tidak cocok (tetap diproses) — pastikan Stream Key benar');
-    }
+    console.log(sig === expected ? '[Saweria] ✓ Signature valid' : '[Saweria] ⚠ Signature tidak cocok (tetap diproses)');
   }
 
   let data;
@@ -245,27 +232,25 @@ app.post('/webhook/saweria', (req, res) => {
   catch { return res.sendStatus(400); }
 
   let amount = 0;
-  if (data.amount_raw !== undefined)               amount = data.amount_raw;
+  if (data.amount_raw !== undefined)                  amount = data.amount_raw;
   else if (data.etc?.amount_to_display !== undefined) amount = data.etc.amount_to_display;
-  else if (data.amount !== undefined)              amount = parseInt(String(data.amount).replace(/[^0-9]/g, '')) || 0;
+  else if (data.amount !== undefined)                 amount = parseInt(String(data.amount).replace(/[^0-9]/g,'')) || 0;
 
-  pushEvent({
-    provider:  'saweria',
-    type:      data.type || 'donation',
-    from:      data.donator_name || data.name || 'Anonim',
+  await pushToStreamlabs({
+    provider: 'saweria',
+    from:     data.donator_name || data.name || 'Anonim',
     amount,
-    currency:  'IDR',
-    message:   data.message || '',
-    avatar:    null,
-    timestamp: data.created_at || new Date().toISOString(),
+    currency: 'IDR',
+    message:  data.message || '',
   });
+
   res.sendStatus(200);
 });
 
 // ═══════════════════════════════════════════════════════
-// TRAKTEER WEBHOOK
+// WEBHOOK TRAKTEER
 // ═══════════════════════════════════════════════════════
-app.post('/webhook/trakteer', (req, res) => {
+app.post('/webhook/trakteer', async (req, res) => {
   let raw;
   try {
     raw = typeof req.body === 'object' && !Buffer.isBuffer(req.body)
@@ -273,86 +258,63 @@ app.post('/webhook/trakteer', (req, res) => {
   } catch { return res.sendStatus(400); }
 
   const d = raw.data || raw;
-  const amount = d.price ? parseInt(String(d.price).replace(/[^0-9]/g, '')) || 0 : 0;
-
-  pushEvent({
-    provider:  'trakteer',
-    type:      'donation',
-    from:      d.supporter_name || 'Anonim',
-    amount,
-    currency:  'IDR',
-    unit:      d.unit || '',
-    quantity:  d.quantity || 1,
-    message:   d.supporter_message || '',
-    avatar:    d.supporter_avatar || null,
-    unit_icon: d.unit_icon || null,
-    timestamp: new Date().toISOString(),
+  await pushToStreamlabs({
+    provider: 'trakteer',
+    from:     d.supporter_name || 'Anonim',
+    amount:   d.price ? parseInt(String(d.price).replace(/[^0-9]/g,'')) || 0 : 0,
+    currency: 'IDR',
+    unit:     d.unit || '',
+    quantity: d.quantity || 1,
+    message:  d.supporter_message || '',
   });
+
   res.sendStatus(200);
 });
 
 // ═══════════════════════════════════════════════════════
-// SOCIABUZZ WEBHOOK
+// WEBHOOK SOCIABUZZ
 // ═══════════════════════════════════════════════════════
-app.post('/webhook/sociabuzz', (req, res) => {
+app.post('/webhook/sociabuzz', async (req, res) => {
   let data;
   try {
     data = typeof req.body === 'object' && !Buffer.isBuffer(req.body)
       ? req.body : JSON.parse(req.body.toString());
   } catch { return res.sendStatus(400); }
 
-  pushEvent({
-    provider:  'sociabuzz',
-    type:      data.type || 'donation',
-    from:      data.invoker_name || data.supporter_name || data.from || 'Anonim',
-    amount:    data.amount || data.amount_raw || 0,
-    currency:  'IDR',
-    message:   data.message || data.supporter_message || '',
-    avatar:    data.avatar || data.invoker_avatar || null,
-    timestamp: data.created_at || new Date().toISOString(),
+  await pushToStreamlabs({
+    provider: 'sociabuzz',
+    from:     data.invoker_name || data.supporter_name || data.from || 'Anonim',
+    amount:   data.amount || data.amount_raw || 0,
+    currency: 'IDR',
+    message:  data.message || data.supporter_message || '',
   });
+
   res.sendStatus(200);
 });
 
 // ═══════════════════════════════════════════════════════
-// STREAMLABS SOCKET
+// STREAMLABS SOCKET (terima event native: follow, superchat YouTube, dll)
 // ═══════════════════════════════════════════════════════
 let slSocket = null;
 
-function restartStreamlabs() {
+function restartStreamlabsSocket() {
   if (slSocket) { try { slSocket.disconnect(); } catch {} slSocket = null; }
   const cfg = loadConfig();
   if (cfg.streamlabs?.enabled && cfg.streamlabs.socket_token) {
-    connectStreamlabs(cfg.streamlabs.socket_token);
+    connectStreamlabsSocket(cfg.streamlabs.socket_token);
   }
 }
 
-function connectStreamlabs(token) {
+function connectStreamlabsSocket(token) {
   try {
     const io = require('socket.io-client');
-    slSocket  = io(`https://sockets.streamlabs.com?token=${token}`, { transports: ['websocket'] });
-    slSocket.on('connect',       () => console.log('[Streamlabs] Connected ✓'));
-    slSocket.on('disconnect',    () => console.log('[Streamlabs] Disconnected'));
-    slSocket.on('connect_error', e  => console.error('[Streamlabs] Error:', e.message));
-    slSocket.on('event', data => {
-      if (!data?.type || !data.message) return;
-      const events = Array.isArray(data.message) ? data.message : [data.message];
-      events.forEach(ev => {
-        let alert = null;
-        if (data.type === 'donation') {
-          alert = { provider:'streamlabs', type:'donation', from:ev.name||'Anonim', amount:parseFloat(ev.amount)||0, currency:ev.currency||'USD', message:ev.message||'', avatar:ev.avatar||null, timestamp:new Date().toISOString() };
-        } else if (data.type === 'follow') {
-          alert = { provider:'streamlabs', type:'follow', from:ev.name||'Someone', amount:null, currency:null, message:'', timestamp:new Date().toISOString() };
-        } else if (['subscription','resub'].includes(data.type)) {
-          alert = { provider:'streamlabs', type:'subscription', from:ev.name||'Someone', amount:null, currency:null, message:ev.message||'', months:ev.months||1, timestamp:new Date().toISOString() };
-        } else if (data.type === 'bits') {
-          alert = { provider:'streamlabs', type:'bits', from:ev.name||'Someone', amount:ev.amount||0, currency:'bits', message:ev.message||'', timestamp:new Date().toISOString() };
-        }
-        if (alert) pushEvent(alert);
-      });
-    });
-  } catch (e) {
-    console.error('[Streamlabs] Error:', e.message);
+    slSocket  = io(`https://sockets.streamlabs.com?token=${token}`, { transports:['websocket'] });
+    slSocket.on('connect',       () => console.log('[SL Socket] Connected ✓'));
+    slSocket.on('disconnect',    () => console.log('[SL Socket] Disconnected'));
+    slSocket.on('connect_error', e  => console.error('[SL Socket] Error:', e.message));
+    slSocket.on('event',         d  => console.log(`[SL Socket] Native event: ${d.type}`));
+  } catch(e) {
+    console.error('[SL Socket] Gagal konek:', e.message);
   }
 }
 
@@ -367,25 +329,22 @@ function getLocalIP() {
 // ── Start ─────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
-  const ip  = getLocalIP();
   const cfg = loadConfig();
+  const ip  = getLocalIP();
 
   console.log('\n╔══════════════════════════════════════════════════════════╗');
-  console.log('║   SE Alert Bridge v2.0                                  ║');
+  console.log('║   SE Alert Bridge v3.0  — Streamlabs Edition           ║');
   console.log('╠══════════════════════════════════════════════════════════╣');
   console.log(`║  Dashboard  →  http://localhost:${PORT}                      ║`);
-  console.log(`║  SSE Events →  http://localhost:${PORT}/events               ║`);
-  console.log(`║  Widget Code→  http://localhost:${PORT}/widget-code           ║`);
+  console.log(`║  LAN        →  http://${ip}:${PORT}                   ║`);
   console.log('╠══════════════════════════════════════════════════════════╣');
-  console.log('║  ⭐ CARA MUDAH — OBS langsung tanpa SE widget:          ║');
-  console.log(`║  Browser Source → http://localhost:${PORT}/overlay           ║`);
-  console.log('╠══════════════════════════════════════════════════════════╣');
-  console.log('║  Webhook endpoints (butuh ngrok):                       ║');
-  console.log('║  /webhook/saweria  /webhook/trakteer  /webhook/sociabuzz║');
-  console.log(`║  LAN: http://${ip}:${PORT}                        ║`);
+  console.log('║  Alur: Saweria/Trakteer → webhook → Streamlabs Alert    ║');
   console.log('╚══════════════════════════════════════════════════════════╝\n');
 
+  if (!cfg.streamlabs?.access_token) {
+    console.log('⚠  access_token belum diset! Buka dashboard → isi token\n');
+  }
   if (cfg.streamlabs?.enabled && cfg.streamlabs.socket_token) {
-    connectStreamlabs(cfg.streamlabs.socket_token);
+    connectStreamlabsSocket(cfg.streamlabs.socket_token);
   }
 });

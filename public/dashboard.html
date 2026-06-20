@@ -10,12 +10,10 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{min-height:100%;font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);}
 ::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-thumb{background:var(--muted2);border-radius:2px;}
-
-/* topbar */
 .topbar{background:var(--s1);border-bottom:1px solid var(--border);padding:0 22px;height:54px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;}
 .logo{font-size:15px;font-weight:700;display:flex;align-items:center;gap:9px;}
 .logo-ico{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#7c6bfa,#e06bfa);display:flex;align-items:center;justify-content:center;font-size:15px;}
-.badge{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;background:linear-gradient(135deg,var(--accent),#e06bfa);color:#fff;}
+.badge{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;background:linear-gradient(135deg,#30e878,#16a880);color:#050e09;}
 .ml{margin-left:auto;display:flex;align-items:center;gap:8px;}
 .spill{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 11px;border-radius:20px;}
 .spill.on{background:rgba(45,212,160,.1);border:1px solid rgba(45,212,160,.25);color:var(--green);}
@@ -23,55 +21,37 @@ html,body{min-height:100%;font-family:'Space Grotesk',sans-serif;background:var(
 .sdot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:blink 1.5s infinite;}
 .sdot.stable{animation:none;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-
-/* layout */
-.page{max-width:880px;margin:0 auto;padding:22px 16px;display:flex;flex-direction:column;gap:18px;}
-
-/* card */
+.page{max-width:860px;margin:0 auto;padding:22px 16px;display:flex;flex-direction:column;gap:16px;}
 .card{background:var(--s1);border:1px solid var(--border);border-radius:13px;overflow:hidden;}
 .card-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px;}
 .card-ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
 .card-title{font-size:14px;font-weight:700;}
 .card-sub{font-size:11px;color:var(--muted);margin-top:1px;}
-.card-body{padding:18px;}
+.card-body{padding:18px;display:flex;flex-direction:column;gap:12px;}
 
-/* highlight box */
-.hbox{background:rgba(45,212,160,.05);border:1px solid rgba(45,212,160,.2);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:14px;margin-bottom:16px;}
-.hbox-icon{font-size:28px;flex-shrink:0;}
-.hbox-text{font-size:13px;color:var(--muted);line-height:1.7;}
-.hbox-text b{color:var(--text);}
-.hbox-text code{font-family:'JetBrains Mono',monospace;background:var(--s3);padding:1px 6px;border-radius:3px;color:var(--accent);font-size:10px;}
+/* checklist */
+.cklist{display:flex;flex-direction:column;gap:4px;}
+.ckrow{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--s2);border-radius:8px;font-size:12px;}
+.ck-ico{font-size:14px;width:20px;text-align:center;flex-shrink:0;}
+.ck-lbl{flex:1;color:var(--muted);}
+.ck-val{font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;}
+.ck-val.ok{color:var(--green);}
+.ck-val.err{color:var(--red);}
+.ck-val.warn{color:var(--yellow);}
+
+/* flow box */
+.flow{background:rgba(48,232,120,.05);border:1px solid rgba(48,232,120,.2);border-radius:10px;padding:14px 16px;font-size:13px;color:var(--muted);line-height:1.9;}
+.flow b{color:var(--text);}
+.flow code{font-family:'JetBrains Mono',monospace;background:var(--s3);padding:1px 6px;border-radius:3px;color:var(--green);font-size:11px;}
 
 /* steps */
-.steps{display:flex;flex-direction:column;gap:8px;}
-.step{display:flex;gap:11px;align-items:flex-start;padding:11px;background:var(--s2);border-radius:8px;}
+.steps{display:flex;flex-direction:column;gap:7px;}
+.step{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--s2);border-radius:8px;}
 .stepn{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
 .stept{font-size:12px;color:var(--muted);line-height:1.7;}
 .stept b{color:var(--text);}
-.stept code{font-family:'JetBrains Mono',monospace;background:var(--s3);padding:1px 6px;border-radius:3px;color:var(--accent);font-size:10px;}
 .stept a{color:var(--accent);text-decoration:none;}
-.stept a:hover{text-decoration:underline;}
-
-/* provider rows */
-.prow{background:var(--s2);border:1px solid var(--border);border-radius:9px;margin-bottom:8px;overflow:hidden;}
-.prow:last-child{margin-bottom:0;}
-.prow-top{padding:12px 14px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:background .15s;}
-.prow-top:hover{background:var(--s3);}
-.prow.open .prow-top{border-bottom:1px solid var(--border);}
-.prow-ico{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
-.prow-info{flex:1;}
-.prow-name{font-size:13px;font-weight:700;}
-.prow-desc{font-size:10px;color:var(--muted);margin-top:1px;}
-.prow-body{padding:14px;display:none;flex-direction:column;gap:10px;}
-.prow.open .prow-body{display:flex;}
-
-/* toggle */
-.tgl{position:relative;width:36px;height:20px;cursor:pointer;flex-shrink:0;}
-.tgl input{position:absolute;opacity:0;width:0;height:0;}
-.ttrack{position:absolute;inset:0;border-radius:10px;background:var(--border);transition:background .2s;}
-.tthumb{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.4);}
-.tgl input:checked~.ttrack{background:var(--accent);}
-.tgl input:checked~.tthumb{left:19px;}
+.stept code{font-family:'JetBrains Mono',monospace;background:var(--s3);padding:1px 6px;border-radius:3px;color:var(--accent);font-size:10px;}
 
 /* form */
 .fg{display:flex;flex-direction:column;gap:4px;}
@@ -83,177 +63,145 @@ html,body{min-height:100%;font-family:'Space Grotesk',sans-serif;background:var(
 .hint a{color:var(--accent);text-decoration:none;}
 .hint code{font-family:'JetBrains Mono',monospace;background:var(--s3);padding:1px 6px;border-radius:3px;color:var(--accent);font-size:10px;}
 
+/* provider rows */
+.prow{background:var(--s2);border:1px solid var(--border);border-radius:9px;overflow:hidden;}
+.prow-top{padding:12px 14px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:background .15s;}
+.prow-top:hover{background:var(--s3);}
+.prow.open .prow-top{border-bottom:1px solid var(--border);}
+.prow-ico{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.prow-info{flex:1;}
+.prow-name{font-size:13px;font-weight:700;}
+.prow-desc{font-size:10px;color:var(--muted);margin-top:1px;}
+.prow-body{padding:14px;display:none;flex-direction:column;gap:10px;}
+.prow.open .prow-body{display:flex;}
+.tgl{position:relative;width:36px;height:20px;cursor:pointer;flex-shrink:0;}
+.tgl input{position:absolute;opacity:0;width:0;height:0;}
+.ttrack{position:absolute;inset:0;border-radius:10px;background:var(--border);transition:background .2s;}
+.tthumb{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.4);}
+.tgl input:checked~.ttrack{background:var(--accent);}
+.tgl input:checked~.tthumb{left:19px;}
+
 /* buttons */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:7px;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;transition:all .15s;white-space:nowrap;}
 .btn-prim{background:linear-gradient(135deg,var(--accent),#e06bfa);color:#fff;}
 .btn-prim:hover{opacity:.85;transform:translateY(-1px);}
-.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);}
-.btn-ghost:hover{border-color:var(--border2);color:var(--text);}
 .btn-green{background:linear-gradient(135deg,var(--green),#16a880);color:#050e09;}
 .btn-green:hover{opacity:.85;transform:translateY(-1px);}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text);}
 .btn-sm{padding:5px 10px;font-size:11px;}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 
-/* grid overlay settings */
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.sel{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px 10px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:12px;outline:none;cursor:pointer;}
-.sel:focus{border-color:var(--accent);}
-
-/* ngrok */
-.ngrow{display:flex;gap:8px;}
-.whgen{display:flex;flex-direction:column;gap:7px;margin-top:12px;}
+/* ngrok urls */
+.whgen{display:flex;flex-direction:column;gap:6px;}
 .whitem{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .whlbl{font-size:11px;font-weight:700;margin-bottom:2px;}
 .whurl{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);}
 
 /* test grid */
-.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:7px;}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:7px;}
 .tbtn{padding:12px 8px;border-radius:9px;border:1px solid var(--border);background:var(--s2);cursor:pointer;font-family:'Space Grotesk',sans-serif;display:flex;flex-direction:column;align-items:center;gap:5px;transition:all .15s;}
 .tbtn:hover{background:var(--s3);border-color:var(--border2);transform:translateY(-1px);}
 .tbtn .ico{font-size:22px;}
 .tbtn .lbl{font-size:12px;font-weight:700;}
 .tbtn .sub{font-size:10px;color:var(--muted);}
 
-/* status counter */
-.scount{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
-.scount-lbl{font-size:12px;color:var(--muted);}
-.scount-val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--green);}
-
-/* copy widget box */
-.cwidget-box{background:rgba(124,107,250,.06);border:1px solid rgba(124,107,250,.25);border-radius:10px;padding:16px;}
-.cwidget-title{font-size:13px;font-weight:700;margin-bottom:6px;color:var(--accent);}
-.cwidget-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+/* result box */
+.result{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);min-height:38px;line-height:1.7;display:none;}
+.result.show{display:block;}
+.result.ok{border-color:rgba(45,212,160,.3);color:var(--green);}
+.result.err{border-color:rgba(245,107,107,.3);color:var(--red);}
 
 /* toast */
 .twrap{position:fixed;bottom:14px;right:14px;display:flex;flex-direction:column;gap:6px;z-index:9999;}
-.toast{padding:8px 14px;border-radius:7px;font-size:12px;font-weight:600;background:var(--s2);border:1px solid var(--border);display:flex;align-items:center;gap:7px;animation:tin .2s ease,tout .3s ease 2.7s forwards;}
+.toast{padding:8px 14px;border-radius:7px;font-size:12px;font-weight:600;background:var(--s2);border:1px solid var(--border);display:flex;align-items:center;gap:7px;animation:tin .2s ease,tout .3s ease 2.7s forwards;max-width:420px;}
 .toast.ok{border-color:rgba(45,212,160,.3);color:var(--green);}
 .toast.err{border-color:rgba(245,107,107,.3);color:var(--red);}
 .toast.info{border-color:rgba(124,107,250,.3);color:var(--accent);}
 @keyframes tin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @keyframes tout{to{opacity:0;transform:translateY(6px)}}
-
-.divider{height:1px;background:var(--border);margin:6px 0;}
 </style>
 </head>
 <body>
-
 <div class="topbar">
   <div class="logo">
     <div class="logo-ico">🎯</div>
-    SE Alert Bridge
-    <span class="badge">v1.0</span>
+    Alert Bridge
+    <span class="badge">Streamlabs v3.0</span>
   </div>
   <div class="ml">
     <div class="spill off" id="spill"><div class="sdot"></div><span id="slbl">Offline</span></div>
-    <button class="btn btn-green" onclick="copyWidgetCode()">📋 Copy Widget Code → SE</button>
-    <button class="btn btn-prim btn-sm" onclick="saveAll()">💾 Simpan</button>
+    <button class="btn btn-green btn-sm" onclick="saveAll()">💾 Simpan Semua</button>
   </div>
 </div>
 
 <div class="page">
 
-  <!-- CARA KERJA -->
-  <div class="card">
-    <div class="card-head">
-      <div class="card-ico" style="background:rgba(45,212,160,.1)">💡</div>
-      <div><div class="card-title">Cara Kerja</div><div class="card-sub">Notifikasi Saweria/Trakteer/dll → masuk ke overlay SE kamu</div></div>
-    </div>
-    <div class="card-body">
-      <div class="hbox">
-        <div class="hbox-icon">🔄</div>
-        <div class="hbox-text">
-          <b>Alur:</b> Provider donasi → kirim webhook ke server ini → server push ke SE Custom Widget via SSE → notifikasi muncul di overlay SE kamu ✅<br>
-          SE overlay kamu tetap utuh, widget ini cuma <b>tambahan</b> di atas overlay yang sudah ada.
-        </div>
-      </div>
-      <div class="steps">
-        <div class="step"><div class="stepn">1</div><div class="stept"><b>Jalankan server ini</b> — <code>npm start</code> atau double-click <code>start.bat</code></div></div>
-        <div class="step"><div class="stepn">2</div><div class="stept">Klik <b style="color:var(--green)">Copy Widget Code → SE</b> di pojok kanan atas — ini kode yang di-paste ke SE</div></div>
-        <div class="step"><div class="stepn">3</div><div class="stept">Di <a href="https://streamelements.com/dashboard/overlays" target="_blank">SE Overlay Editor</a> → <b>Add Widget → Custom Widget</b> → Open Editor → tab <b>HTML</b> → hapus semua → <b>paste kode</b></div></div>
-        <div class="step"><div class="stepn">4</div><div class="stept">Tab <b>CSS</b> → kosongkan. Tab <b>JS</b> → kosongkan. Tab <b>Fields</b> → kosongkan. Klik <b>Done → Save</b></div></div>
-        <div class="step"><div class="stepn">5</div><div class="stept">Atur ukuran widget di canvas SE: <b>Width 1920 × Height 1080</b>, posisi <b>X:0 Y:0</b> — full screen</div></div>
-        <div class="step"><div class="stepn">6</div><div class="stept">Setup provider di bawah → klik <b>Test Alert</b> → notifikasi muncul di overlay SE kamu ✅</div></div>
-      </div>
-    </div>
-  </div>
-
   <!-- STATUS -->
   <div class="card">
     <div class="card-head">
-      <div class="card-ico" style="background:rgba(45,212,160,.1)">📡</div>
-      <div><div class="card-title">Status Koneksi</div><div class="card-sub">Berapa SE widget yang sedang terhubung ke server ini</div></div>
+      <div class="card-ico" style="background:rgba(48,232,120,.1)">📡</div>
+      <div><div class="card-title">Status Koneksi</div><div class="card-sub">Semua harus ✅ sebelum live</div></div>
     </div>
     <div class="card-body">
-      <div class="scount">
-        <span class="scount-lbl">SE Custom Widget terhubung</span>
-        <span class="scount-val" id="widgetCount">0</span>
+      <div class="cklist">
+        <div class="ckrow"><span class="ck-ico">🖥️</span><span class="ck-lbl">Server berjalan</span><span class="ck-val" id="ck-server">Mengecek...</span></div>
+        <div class="ckrow"><span class="ck-ico">🌐</span><span class="ck-lbl">Ngrok URL tersimpan</span><span class="ck-val" id="ck-ngrok">-</span></div>
+        <div class="ckrow"><span class="ck-ico">🔑</span><span class="ck-lbl">Streamlabs API Token</span><span class="ck-val" id="ck-token">-</span></div>
+        <div class="ckrow"><span class="ck-ico">🔌</span><span class="ck-lbl">Streamlabs Socket (follow/superchat)</span><span class="ck-val" id="ck-socket">-</span></div>
       </div>
-      <p class="hint" style="margin-top:10px;">💡 Angka di atas harus <b style="color:var(--green)">≥ 1</b> saat OBS sedang live dan overlay SE aktif. Kalau 0, widget SE belum di-paste atau server belum jalan.</p>
+      <div class="row">
+        <button class="btn btn-ghost btn-sm" onclick="checkStatus()">🔄 Refresh</button>
+      </div>
     </div>
   </div>
 
-  <!-- PROVIDER CONFIG -->
+  <!-- CARA KERJA -->
   <div class="card">
     <div class="card-head">
-      <div class="card-ico" style="background:rgba(124,107,250,.1)">🔌</div>
-      <div><div class="card-title">Koneksi Provider</div><div class="card-sub">Aktifkan platform donasi yang kamu pakai</div></div>
+      <div class="card-ico" style="background:rgba(124,107,250,.1)">💡</div>
+      <div><div class="card-title">Alur Kerja</div><div class="card-sub">Setup sekali, jalan terus</div></div>
     </div>
     <div class="card-body">
-
-      <!-- Saweria -->
-      <div class="prow" id="pr-saweria">
-        <div class="prow-top" onclick="toggleProw('saweria')">
-          <div class="prow-ico" style="background:rgba(245,200,66,.1)">💛</div>
-          <div class="prow-info"><div class="prow-name" style="color:var(--saw)">Saweria</div><div class="prow-desc">Webhook — butuh ngrok</div></div>
-          <label class="tgl" onclick="event.stopPropagation()"><input type="checkbox" id="saw-on" onchange="quickSave()"><div class="ttrack"></div><div class="tthumb"></div></label>
-        </div>
-        <div class="prow-body">
-          <div class="fg"><div class="fl">Stream Key (untuk verifikasi signature)</div><input class="fi" id="saw-key" type="password" placeholder="Stream key dari dashboard Saweria"></div>
-          <p class="hint">Buka <a href="https://saweria.co/dashboard" target="_blank">saweria.co/dashboard</a> → <b>Integrasi → Webhook</b><br>
-          Isi URL: <code>https://NGROK_URL/webhook/saweria</code> → copy Stream Key → paste di atas</p>
-        </div>
+      <div class="flow">
+        <b>Saweria / Trakteer / SociaBuzz</b><br>
+        → donasi masuk → kirim webhook ke server ini (lewat ngrok)<br>
+        → server forward ke <b>Streamlabs API</b> sebagai tip<br>
+        → Streamlabs tampilkan di <b>Alert Box</b> di OBS kamu ✅<br><br>
+        Animasi, suara, tema → diatur di <b>Streamlabs Dashboard</b> seperti biasa.<br>
+        OBS cukup <b>1 Browser Source</b> dari Alert Box Streamlabs.
       </div>
-
-      <!-- Trakteer -->
-      <div class="prow" id="pr-trakteer">
-        <div class="prow-top" onclick="toggleProw('trakteer')">
-          <div class="prow-ico" style="background:rgba(232,67,147,.1)">🩷</div>
-          <div class="prow-info"><div class="prow-name" style="color:var(--trk)">Trakteer</div><div class="prow-desc">Webhook — butuh ngrok</div></div>
-          <label class="tgl" onclick="event.stopPropagation()"><input type="checkbox" id="trk-on" onchange="quickSave()"><div class="ttrack"></div><div class="tthumb"></div></label>
-        </div>
-        <div class="prow-body">
-          <p class="hint">Buka <a href="https://trakteer.id/manage" target="_blank">trakteer.id/manage</a> → <b>Integrasi → Webhook</b><br>
-          Isi URL: <code>https://NGROK_URL/webhook/trakteer</code> → aktifkan → test</p>
-        </div>
+      <div class="steps">
+        <div class="step"><div class="stepn">1</div><div class="stept">Isi <b>Streamlabs API Token</b> di bawah → Simpan</div></div>
+        <div class="step"><div class="stepn">2</div><div class="stept">Jalankan <code>ngrok http 3000</code> → paste URL ngrok → Simpan Ngrok → Generate URL</div></div>
+        <div class="step"><div class="stepn">3</div><div class="stept">Paste webhook URL ke dashboard masing-masing provider (Saweria, Trakteer, dll)</div></div>
+        <div class="step"><div class="stepn">4</div><div class="stept">Di OBS: tambah <b>Browser Source</b> dari <a href="https://streamlabs.com/dashboard#/alertbox" target="_blank">Streamlabs Alert Box URL</a></div></div>
+        <div class="step"><div class="stepn">5</div><div class="stept">Klik <b>Test Alert</b> di bawah → notifikasi harus muncul di OBS ✅</div></div>
       </div>
+    </div>
+  </div>
 
-      <!-- SociaBuzz -->
-      <div class="prow" id="pr-sociabuzz">
-        <div class="prow-top" onclick="toggleProw('sociabuzz')">
-          <div class="prow-ico" style="background:rgba(67,148,232,.1)">💙</div>
-          <div class="prow-info"><div class="prow-name" style="color:var(--soc)">SociaBuzz Tribe</div><div class="prow-desc">Webhook — butuh ngrok</div></div>
-          <label class="tgl" onclick="event.stopPropagation()"><input type="checkbox" id="soc-on" onchange="quickSave()"><div class="ttrack"></div><div class="tthumb"></div></label>
-        </div>
-        <div class="prow-body">
-          <p class="hint">Buka <a href="https://sociabuzz.com/proaccount/tribe/settings/integrations" target="_blank">SociaBuzz → Integrasi → Webhook</a><br>
-          Isi URL: <code>https://NGROK_URL/webhook/sociabuzz</code> → aktifkan</p>
-        </div>
+  <!-- STREAMLABS TOKEN -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-ico" style="background:rgba(48,232,120,.1)">🔑</div>
+      <div><div class="card-title">Streamlabs API Token</div><div class="card-sub">Wajib diisi — untuk forward notifikasi ke Alert Box</div></div>
+    </div>
+    <div class="card-body">
+      <div class="fg">
+        <div class="fl">API Access Token</div>
+        <input class="fi" id="slb-access" type="password" placeholder="Token dari Streamlabs → API Settings → Access Token">
       </div>
-
-      <!-- Streamlabs -->
-      <div class="prow" id="pr-streamlabs">
-        <div class="prow-top" onclick="toggleProw('streamlabs')">
-          <div class="prow-ico" style="background:rgba(48,232,120,.1)">🎮</div>
-          <div class="prow-info"><div class="prow-name" style="color:var(--slb)">Streamlabs</div><div class="prow-desc">Socket API — TIDAK butuh ngrok ✅</div></div>
-          <label class="tgl" onclick="event.stopPropagation()"><input type="checkbox" id="slb-on" onchange="quickSave()"><div class="ttrack"></div><div class="tthumb"></div></label>
-        </div>
-        <div class="prow-body">
-          <div class="fg"><div class="fl">Socket API Token</div><input class="fi" id="slb-token" type="password" placeholder="Token dari Streamlabs → API Settings → Socket API Token"></div>
-          <p class="hint"><a href="https://streamlabs.com/dashboard#/settings/api-settings" target="_blank">streamlabs.com → API Settings</a> → tab <b>API Tokens</b> → copy <b>Socket API Token</b><br>
-          Server ini konek langsung ke Streamlabs — tidak perlu ngrok sama sekali ✅</p>
-        </div>
+      <div class="fg">
+        <div class="fl">Socket API Token (opsional — untuk follow & superchat YouTube native)</div>
+        <input class="fi" id="slb-socket" type="password" placeholder="Token dari Streamlabs → API Settings → Socket API Token">
       </div>
-
+      <p class="hint">
+        Buka <a href="https://streamlabs.com/dashboard#/settings/api-settings" target="_blank">streamlabs.com → Settings → API Settings</a><br>
+        <b>Access Token</b> = untuk push donasi ke Streamlabs (wajib)<br>
+        <b>Socket API Token</b> = untuk terima follow/superchat native YouTube (opsional)
+      </p>
+      <button class="btn btn-green" onclick="saveTokens()">💾 Simpan Token</button>
     </div>
   </div>
 
@@ -261,60 +209,57 @@ html,body{min-height:100%;font-family:'Space Grotesk',sans-serif;background:var(
   <div class="card">
     <div class="card-head">
       <div class="card-ico" style="background:rgba(245,200,66,.1)">🌐</div>
-      <div><div class="card-title">Setup Ngrok (Saweria, Trakteer, SociaBuzz)</div><div class="card-sub">Gratis — expose localhost ke internet agar webhook bisa masuk</div></div>
+      <div><div class="card-title">Ngrok — URL Publik</div><div class="card-sub">Agar Saweria/Trakteer bisa kirim webhook ke server lokal kamu</div></div>
     </div>
     <div class="card-body">
-      <div class="steps" style="margin-bottom:14px;">
-        <div class="step"><div class="stepn">1</div><div class="stept">Download <a href="https://ngrok.com/download" target="_blank">ngrok.com/download</a> → daftar akun gratis → install</div></div>
-        <div class="step"><div class="stepn">2</div><div class="stept">Di terminal: <code>ngrok config add-authtoken TOKEN_KAMU</code></div></div>
-        <div class="step"><div class="stepn">3</div><div class="stept">Jalankan server ini dulu, lalu terminal baru: <code>ngrok http 3000</code></div></div>
-        <div class="step"><div class="stepn">4</div><div class="stept">Copy URL ngrok (contoh: <b>https://abc123.ngrok.io</b>) → paste di bawah</div></div>
-      </div>
-      <div class="fl" style="margin-bottom:6px;">URL Ngrok kamu</div>
-      <div class="ngrow">
-        <input class="fi" id="ngrokUrl" placeholder="https://abc123.ngrok.io" style="flex:1;">
+      <div class="row">
+        <input class="fi" id="ngrokUrl" placeholder="https://abc123.ngrok-free.app" style="flex:1;">
+        <button class="btn btn-green" onclick="saveNgrok()">💾 Simpan Ngrok</button>
         <button class="btn btn-prim" onclick="genWebhooks()">⚡ Generate URL</button>
       </div>
       <div id="whgen" class="whgen" style="display:none;"></div>
+      <p class="hint">Terminal: <code>ngrok http 3000</code> → copy URL → paste di atas → Simpan Ngrok → Generate URL → copy ke masing-masing provider</p>
     </div>
   </div>
 
-  <!-- OVERLAY SETTINGS -->
+  <!-- PROVIDER -->
   <div class="card">
     <div class="card-head">
-      <div class="card-ico" style="background:rgba(124,107,250,.1)">🎨</div>
-      <div><div class="card-title">Pengaturan Tampilan Alert</div><div class="card-sub">Posisi, durasi, dan suara notifikasi di overlay SE</div></div>
+      <div class="card-ico" style="background:rgba(124,107,250,.1)">🔌</div>
+      <div><div class="card-title">Provider Donasi</div><div class="card-sub">Aktifkan yang kamu pakai</div></div>
     </div>
     <div class="card-body">
-      <div class="grid2">
-        <div class="fg">
-          <div class="fl">Posisi Alert</div>
-          <select class="sel" id="ov-pos">
-            <option value="bottom-right">↘ Kanan Bawah</option>
-            <option value="bottom-left">↙ Kiri Bawah</option>
-            <option value="top-right">↗ Kanan Atas</option>
-            <option value="top-left">↖ Kiri Atas</option>
-            <option value="bottom-center">↓ Tengah Bawah</option>
-            <option value="top-center">↑ Tengah Atas</option>
-          </select>
+      <div class="prow" id="pr-saweria">
+        <div class="prow-top" onclick="toggleProw('saweria')">
+          <div class="prow-ico" style="background:rgba(245,200,66,.1)">💛</div>
+          <div class="prow-info"><div class="prow-name" style="color:var(--saw)">Saweria</div><div class="prow-desc">Webhook via ngrok</div></div>
+          <label class="tgl" onclick="event.stopPropagation()"><input type="checkbox" id="saw-on" onchange="quickSave()"><div class="ttrack"></div><div class="tthumb"></div></label>
         </div>
-        <div class="fg">
-          <div class="fl">Durasi Tampil (detik)</div>
-          <input class="fi" id="ov-dur" type="number" min="2" max="30" value="6" step="1">
-        </div>
-        <div class="fg">
-          <div class="fl">Jeda antar Alert (detik)</div>
-          <input class="fi" id="ov-delay" type="number" min="0" max="10" value="1" step="0.5">
-        </div>
-        <div class="fg">
-          <div class="fl">Suara Notifikasi</div>
-          <select class="sel" id="ov-sound">
-            <option value="true">✅ Aktif</option>
-            <option value="false">🔇 Nonaktif</option>
-          </select>
+        <div class="prow-body">
+          <div class="fg"><div class="fl">Stream Key (opsional, untuk verifikasi signature)</div><input class="fi" id="saw-key" type="password" placeholder="Stream key dari dashboard Saweria"></div>
+          <p class="hint">Buka <a href="https://saweria.co/admin/integrations" target="_blank">saweria.co → Integrasi → Webhook</a> → isi URL webhook dari Generate URL di atas</p>
         </div>
       </div>
-      <p class="hint" style="margin-top:10px;">Perubahan posisi & pengaturan langsung diterapkan ke semua SE widget yang terhubung.</p>
+      <div class="prow" id="pr-trakteer">
+        <div class="prow-top" onclick="toggleProw('trakteer')">
+          <div class="prow-ico" style="background:rgba(232,67,147,.1)">🩷</div>
+          <div class="prow-info"><div class="prow-name" style="color:var(--trk)">Trakteer</div><div class="prow-desc">Webhook via ngrok</div></div>
+          <label class="tgl" onclick="event.stopPropagation()"><input type="checkbox" id="trk-on" onchange="quickSave()"><div class="ttrack"></div><div class="tthumb"></div></label>
+        </div>
+        <div class="prow-body">
+          <p class="hint">Buka <a href="https://trakteer.id/manage" target="_blank">trakteer.id → Integrasi → Webhook</a> → isi URL webhook dari Generate URL di atas</p>
+        </div>
+      </div>
+      <div class="prow" id="pr-sociabuzz">
+        <div class="prow-top" onclick="toggleProw('sociabuzz')">
+          <div class="prow-ico" style="background:rgba(67,148,232,.1)">💙</div>
+          <div class="prow-info"><div class="prow-name" style="color:var(--soc)">SociaBuzz</div><div class="prow-desc">Webhook via ngrok</div></div>
+          <label class="tgl" onclick="event.stopPropagation()"><input type="checkbox" id="soc-on" onchange="quickSave()"><div class="ttrack"></div><div class="tthumb"></div></label>
+        </div>
+        <div class="prow-body">
+          <p class="hint">Buka <a href="https://sociabuzz.com/proaccount/tribe/settings/integrations" target="_blank">SociaBuzz → Integrasi</a> → isi URL webhook dari Generate URL di atas</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -322,17 +267,16 @@ html,body{min-height:100%;font-family:'Space Grotesk',sans-serif;background:var(
   <div class="card">
     <div class="card-head">
       <div class="card-ico" style="background:rgba(45,212,160,.1)">🧪</div>
-      <div><div class="card-title">Test Alert</div><div class="card-sub">Klik untuk kirim test — harus muncul di overlay SE kamu</div></div>
+      <div><div class="card-title">Test Alert</div><div class="card-sub">Klik → notifikasi harus muncul di Alert Box OBS kamu</div></div>
     </div>
     <div class="card-body">
       <div class="tgrid">
         <button class="tbtn" onclick="sendTest('saweria')"><span class="ico">💛</span><span class="lbl" style="color:var(--saw)">Saweria</span><span class="sub">Rp 69.420</span></button>
         <button class="tbtn" onclick="sendTest('trakteer')"><span class="ico">🩷</span><span class="lbl" style="color:var(--trk)">Trakteer</span><span class="sub">2x Cendol</span></button>
         <button class="tbtn" onclick="sendTest('sociabuzz')"><span class="ico">💙</span><span class="lbl" style="color:var(--soc)">SociaBuzz</span><span class="sub">Rp 20.000</span></button>
-        <button class="tbtn" onclick="sendTest('streamlabs')"><span class="ico">🎮</span><span class="lbl" style="color:var(--slb)">Streamlabs</span><span class="sub">$5</span></button>
-        <button class="tbtn" onclick="sendTest('follow')"><span class="ico">👤</span><span class="lbl">Follow</span><span class="sub">New follower</span></button>
-        <button class="tbtn" onclick="sendTest('subscription')"><span class="ico">⭐</span><span class="lbl">Subscriber</span><span class="sub">New sub</span></button>
       </div>
+      <div class="result" id="testResult"></div>
+      <p class="hint">💡 Notifikasi muncul di <b>Streamlabs Alert Box</b> di OBS — bukan di halaman ini. Nama donatur akan tampil sebagai "Nama [Provider]" dan nominal asli ada di pesan.</p>
     </div>
   </div>
 
@@ -340,80 +284,41 @@ html,body{min-height:100%;font-family:'Space Grotesk',sans-serif;background:var(
 <div class="twrap" id="twrap"></div>
 
 <script>
-let WIDGET_CODE = '';
-
-// Load widget code dari server
-async function fetchWidgetCode() {
-  try {
-    const r = await fetch('/widget-code');
-    if (r.ok) WIDGET_CODE = await r.text();
-  } catch {}
-}
-
-// Copy widget code
-async function copyWidgetCode() {
-  if (!WIDGET_CODE) await fetchWidgetCode();
-  if (!WIDGET_CODE) { toast('Gagal load widget code, coba refresh', 'err'); return; }
-  try {
-    await navigator.clipboard.writeText(WIDGET_CODE);
-    toast('Widget code dicopy! Buka SE → Add Widget → Custom Widget → Open Editor → tab HTML → paste ✓', 'ok');
-  } catch {
-    toast('Gagal copy — coba buka http://localhost:3000/widget-code secara manual', 'err');
-  }
-}
-
-// Load config
 async function loadConfig() {
   try {
     const r = await fetch('/api/config');
     const c = await r.json();
-    document.getElementById('saw-on').checked  = c.saweria?.enabled  || false;
-    document.getElementById('saw-key').value   = c.saweria?.stream_key || '';
-    document.getElementById('trk-on').checked  = c.trakteer?.enabled  || false;
-    document.getElementById('soc-on').checked  = c.sociabuzz?.enabled || false;
-    document.getElementById('slb-on').checked  = c.streamlabs?.enabled|| false;
-    document.getElementById('slb-token').value = c.streamlabs?.socket_token || '';
-    if (c.overlay) {
-      document.getElementById('ov-pos').value   = c.overlay.position    || 'bottom-right';
-      document.getElementById('ov-dur').value   = (c.overlay.duration   || 6000) / 1000;
-      document.getElementById('ov-delay').value = (c.overlay.queue_delay|| 1000) / 1000;
-      document.getElementById('ov-sound').value = String(c.overlay.sound !== false);
-    }
+    if (c.ngrokUrl) document.getElementById('ngrokUrl').value = c.ngrokUrl;
+    document.getElementById('slb-access').value = c.streamlabs?.access_token || '';
+    document.getElementById('slb-socket').value = c.streamlabs?.socket_token || '';
+    document.getElementById('saw-on').checked   = c.saweria?.enabled  || false;
+    document.getElementById('saw-key').value    = c.saweria?.stream_key || '';
+    document.getElementById('trk-on').checked   = c.trakteer?.enabled  || false;
+    document.getElementById('soc-on').checked   = c.sociabuzz?.enabled || false;
   } catch {}
 }
 
-function getConfig() {
-  return {
-    saweria:    { enabled: document.getElementById('saw-on').checked,  stream_key: document.getElementById('saw-key').value.trim() },
-    trakteer:   { enabled: document.getElementById('trk-on').checked },
-    sociabuzz:  { enabled: document.getElementById('soc-on').checked },
-    streamlabs: { enabled: document.getElementById('slb-on').checked, socket_token: document.getElementById('slb-token').value.trim() },
-    overlay: {
-      position:    document.getElementById('ov-pos').value,
-      duration:    parseFloat(document.getElementById('ov-dur').value) * 1000,
-      queue_delay: parseFloat(document.getElementById('ov-delay').value) * 1000,
-      sound:       document.getElementById('ov-sound').value === 'true',
-    },
+async function saveTokens() {
+  const body = {
+    streamlabs: {
+      enabled:      true,
+      access_token: document.getElementById('slb-access').value.trim(),
+      socket_token: document.getElementById('slb-socket').value.trim(),
+    }
   };
-}
-
-async function saveAll() {
   try {
-    const r = await fetch('/api/config', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(getConfig()) });
-    if (!r.ok) throw new Error('HTTP '+r.status);
-    toast('Config tersimpan ✅ — perubahan langsung diterapkan ke SE widget', 'ok');
+    await fetch('/api/config', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    toast('✅ Token tersimpan!', 'ok');
+    checkStatus();
   } catch(e) { toast('Gagal: '+e.message, 'err'); }
 }
 
-async function quickSave() {
-  await fetch('/api/config', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(getConfig()) }).catch(()=>{});
-}
-
-async function sendTest(p) {
-  try {
-    await fetch('/api/test', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({provider:p}) });
-    toast(`Test ${p} terkirim — cek overlay SE kamu`, 'info');
-  } catch(e) { toast('Gagal: '+e.message, 'err'); }
+async function saveNgrok() {
+  const url = document.getElementById('ngrokUrl').value.trim().replace(/\/$/,'');
+  if (!url || !url.startsWith('https://')) { toast('URL ngrok harus diawali https://', 'err'); return; }
+  await fetch('/api/ngrok', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({url}) });
+  toast('✅ Ngrok URL tersimpan — sekarang klik Generate URL', 'ok');
+  checkStatus();
 }
 
 function genWebhooks() {
@@ -433,39 +338,83 @@ function genWebhooks() {
     </div>`).join('');
 }
 
+async function saveAll() {
+  const body = {
+    ngrokUrl:   document.getElementById('ngrokUrl').value.trim().replace(/\/$/,''),
+    streamlabs: {
+      enabled:      true,
+      access_token: document.getElementById('slb-access').value.trim(),
+      socket_token: document.getElementById('slb-socket').value.trim(),
+    },
+    saweria:   { enabled: document.getElementById('saw-on').checked, stream_key: document.getElementById('saw-key').value.trim() },
+    trakteer:  { enabled: document.getElementById('trk-on').checked },
+    sociabuzz: { enabled: document.getElementById('soc-on').checked },
+  };
+  try {
+    await fetch('/api/config', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    toast('✅ Semua config tersimpan!', 'ok');
+    checkStatus();
+  } catch(e) { toast('Gagal: '+e.message, 'err'); }
+}
+
+async function quickSave() { await saveAll().catch(()=>{}); }
+
+async function sendTest(provider) {
+  const el = document.getElementById('testResult');
+  el.className = 'result show';
+  el.textContent = `Mengirim test ${provider} ke Streamlabs...`;
+  try {
+    const r = await fetch('/api/test', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({provider}) });
+    const d = await r.json();
+    el.className = 'result show ' + (d.ok ? 'ok' : 'err');
+    el.textContent = d.note;
+  } catch(e) {
+    el.className = 'result show err';
+    el.textContent = 'Error: ' + e.message;
+  }
+}
+
 function toggleProw(id) { document.getElementById('pr-'+id).classList.toggle('open'); }
 function copyText(t) { navigator.clipboard.writeText(t).then(()=>toast('Dicopy ✓','ok')); }
 
 function toast(msg, type='ok') {
-  const w = document.getElementById('twrap');
-  const t = document.createElement('div');
+  const w = document.getElementById('twrap'), t = document.createElement('div');
   t.className = 'toast '+type; t.textContent = msg; w.appendChild(t);
-  setTimeout(()=>t.remove(), type==='ok'?3500:5000);
+  setTimeout(()=>t.remove(), type==='err' ? 6000 : 3500);
 }
 
 async function checkStatus() {
   try {
     const r = await fetch('/api/status');
-    if (r.ok) {
-      const d = await r.json();
-      const pill = document.getElementById('spill');
-      pill.className = 'spill on';
-      pill.querySelector('.sdot').classList.add('stable');
-      document.getElementById('slbl').textContent = 'Server Online';
-      document.getElementById('widgetCount').textContent = d.widgets_connected;
-    }
+    const d = await r.json();
+
+    document.getElementById('spill').className = 'spill on';
+    document.getElementById('spill').querySelector('.sdot').classList.add('stable');
+    document.getElementById('slbl').textContent = 'Server Online';
+
+    const set = (id, ok, text) => {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = 'ck-val ' + (ok ? 'ok' : 'err');
+    };
+
+    set('ck-server', true, '✅ Online v' + d.version);
+    set('ck-ngrok',  d.ngrok_configured,   d.ngrok_configured  ? '✅ ' + d.ngrok_url : '❌ Belum diset');
+    set('ck-token',  d.streamlabs_token,   d.streamlabs_token  ? '✅ Token tersimpan' : '❌ Belum diisi');
+    set('ck-socket', d.streamlabs_socket || true,
+      d.streamlabs_socket ? '✅ Socket tersimpan' : '⚠ Belum diisi (opsional)');
+    document.getElementById('ck-socket').className = 'ck-val ' + (d.streamlabs_socket ? 'ok' : 'warn');
   } catch {
     document.getElementById('spill').className = 'spill off';
-    document.getElementById('slbl').textContent = 'Server Offline';
-    document.getElementById('widgetCount').textContent = '0';
+    document.getElementById('slbl').textContent = 'Offline';
+    document.getElementById('ck-server').textContent = '❌ Server tidak bisa dijangkau';
+    document.getElementById('ck-server').className   = 'ck-val err';
   }
 }
 
-// Init
 loadConfig();
-fetchWidgetCode();
 checkStatus();
-setInterval(checkStatus, 4000);
+setInterval(checkStatus, 5000);
 </script>
 </body>
 </html>
